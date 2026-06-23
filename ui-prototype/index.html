@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>舒摩到家 · Vientiane · v2.0 UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --p: #FF4D1A; --p2: #FF6B3D; --p3: #FF9A6C; --p-light: #FFF0EB; --p-glow: rgba(255,77,26,0.25);
+  --bg: #0A0A0F; --bg2: #12121A;
+  --card: #FFFFFF; --card-dark: #1E1E2E;
+  --text: #1A1A2E; --text-s: #6B7A99; --text-xs: #9AA5BE;
+  --success: #10B981; --warning: #F59E0B; --info: #3B82F6;
+  --r-sm: 12px; --r-md: 18px; --r-lg: 24px; --r-xl: 32px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08); --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+  --glass: rgba(255,255,255,0.85); --glass-border: rgba(255,255,255,0.6);
+}
+body { font-family: -apple-system,'PingFang TC','Noto Sans TC','Noto Sans Thai',sans-serif; background: var(--bg); color: var(--text); min-height:100vh; }
+
+/* ── TOP CHROME ── */
+.lang-bar { background: linear-gradient(135deg, #0a0a0f, #16091a); padding:8px 20px; display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(255,107,61,0.15); }
+.lang-btn { padding:5px 14px; border-radius:20px; border:1.5px solid rgba(255,107,61,0.3); background:transparent; color:rgba(255,255,255,0.5); font-size:11px; font-weight:700; cursor:pointer; transition:all .25s; letter-spacing:.5px; }
+.lang-btn.active { background:linear-gradient(135deg,#FF4D1A,#FF6B3D); border-color:transparent; color:#fff; box-shadow:0 2px 12px rgba(255,77,26,0.4); }
+.app-topbar { background:linear-gradient(180deg,#0a0a0f,var(--bg)); padding:12px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,107,61,0.08); }
+.app-logo { font-size:17px; font-weight:900; background:linear-gradient(135deg,#FF6B3D,#FFAA5C); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:.5px; }
+.app-badge { background:rgba(255,107,61,0.12); color:#FF6B3D; font-size:9px; font-weight:800; padding:3px 9px; border-radius:20px; border:1px solid rgba(255,107,61,0.2); letter-spacing:.8px; text-transform:uppercase; }
+
+/* ── PAGE NAV ── */
+.tab-nav { display:flex; background:var(--bg); border-bottom:1px solid rgba(255,255,255,0.04); padding:0 8px; overflow-x:auto; gap:0; scrollbar-width:none; }
+.tab-nav::-webkit-scrollbar { display:none; }
+.tab-nav button { flex-shrink:0; padding:11px 16px; border:none; background:none; font-size:12px; font-weight:600; color:rgba(255,255,255,0.3); cursor:pointer; border-bottom:2px solid transparent; transition:all .25s; white-space:nowrap; letter-spacing:.3px; }
+.tab-nav button.active { color:#FF6B3D; border-bottom-color:#FF6B3D; }
+
+.screens-wrap { display:flex; overflow-x:auto; padding:24px 20px 36px; gap:28px; scrollbar-width:none; }
+.screens-wrap::-webkit-scrollbar { display:none; }
+.phone-col { display:flex; flex-direction:column; align-items:center; gap:12px; flex-shrink:0; }
+.phone-label { font-size:10px; font-weight:700; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:2px; }
+.phone-frame { width:375px; height:800px; background:#F7F8FC; border-radius:50px; box-shadow: 0 0 0 2px #2a2a3e, 0 0 0 4px #1a1a2e, 0 0 0 6px rgba(255,107,61,0.12), 0 24px 80px rgba(0,0,0,0.6); overflow:hidden; display:flex; flex-direction:column; position:relative; }
+.phone-notch { width:120px; height:28px; background:#1a1a2e; border-radius:0 0 20px 20px; margin:0 auto; flex-shrink:0; z-index:10; }
+.phone-screen { flex:1; overflow-y:auto; display:flex; flex-direction:column; scrollbar-width:none; }
+.phone-screen::-webkit-scrollbar { display:none; }
+
+.tab-panel { display:none; }
+.tab-panel.active { display:flex; gap:28px; }
+
+/* ── STATUS BAR ── */
+.sb { display:flex; justify-content:space-between; align-items:center; padding:5px 20px 4px; font-size:11px; color:#888; flex-shrink:0; background:#fff; }
+.sb .t { font-weight:800; font-size:13px; color:#1a1a2e; }
+.sb .icons { display:flex; gap:4px; align-items:center; font-size:10px; }
+
+/* ── BOTTOM NAV ── */
+.bnav { display:flex; border-top:1px solid #F0F1F5; background:#fff; flex-shrink:0; padding:8px 0 18px; }
+.bnav a { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; text-decoration:none; color:#C8CDD9; font-size:9px; font-weight:600; cursor:pointer; transition:color .2s; letter-spacing:.3px; }
+.bnav a.on { color:var(--p); }
+.bnav a .ico { font-size:20px; line-height:1; }
+
+/* ══════════════════════════════════════════
+   USER HOME
+══════════════════════════════════════════ */
+.uh { background:#F7F8FC; display:flex; flex-direction:column; flex:1; }
+
+.uh-hero { background:linear-gradient(160deg, #1A0A00 0%, #FF4D1A 45%, #FF6B3D 75%, #FFAA5C 100%); padding:16px 20px 20px; position:relative; overflow:hidden; flex-shrink:0; }
+.uh-hero::after { content:''; position:absolute; bottom:-40px; right:-60px; width:220px; height:220px; background:rgba(255,255,255,0.07); border-radius:50%; pointer-events:none; }
+.uh-hero::before { content:''; position:absolute; top:-80px; left:-80px; width:240px; height:240px; background:rgba(255,255,255,0.04); border-radius:50%; pointer-events:none; }
+.uh-toprow { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; position:relative; z-index:1; }
+.uh-greeting { font-size:12px; color:rgba(255,255,255,0.7); font-weight:500; }
+.uh-name { font-size:20px; font-weight:800; color:#fff; margin-top:2px; letter-spacing:-.3px; }
+.uh-loc { font-size:10px; color:rgba(255,255,255,0.65); margin-top:4px; display:flex; align-items:center; gap:3px; }
+.uh-avatar { width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:19px; border:2px solid rgba(255,255,255,0.35); box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+.uh-msgbell { position:relative; }
+.uh-dot { width:8px; height:8px; background:#fff; border-radius:50%; position:absolute; top:0; right:0; border:1.5px solid #FF4D1A; }
+
+/* ── BANNER ── */
+.uh-banner { position:relative; overflow:hidden; flex-shrink:0; }
+.banner-track { display:flex; transition:transform .45s cubic-bezier(.25,.8,.25,1); }
+.bslide { min-width:100%; height:150px; position:relative; overflow:hidden; flex-shrink:0; }
+.bslide-bg { position:absolute; inset:0; }
+.bslide-deco { position:absolute; right:-15px; bottom:-20px; font-size:100px; opacity:.15; pointer-events:none; filter:blur(1px); }
+.bslide-content { position:relative; z-index:2; padding:16px 20px; height:100%; display:flex; flex-direction:column; justify-content:space-between; }
+.bslide-chip { align-self:flex-start; font-size:9px; font-weight:800; background:rgba(255,255,255,0.22); backdrop-filter:blur(8px); color:#fff; padding:3px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.3); letter-spacing:.8px; text-transform:uppercase; }
+.bslide-title { font-size:18px; font-weight:900; color:#fff; line-height:1.25; text-shadow:0 2px 8px rgba(0,0,0,0.15); }
+.bslide-sub { font-size:11px; color:rgba(255,255,255,0.85); margin-top:3px; font-weight:500; }
+.bslide-cta { align-self:flex-start; background:rgba(255,255,255,0.95); font-size:11px; font-weight:800; padding:6px 16px; border-radius:20px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.15); }
+.banner-dots { display:flex; justify-content:center; gap:5px; padding:8px 0; background:#F7F8FC; flex-shrink:0; }
+.banner-dots span { width:5px; height:5px; border-radius:3px; background:rgba(0,0,0,0.12); cursor:pointer; transition:all .3s; }
+.banner-dots span.active { width:16px; background:var(--p); }
+
+/* ── CATEGORIES ── */
+.uh-section { padding:14px 16px 10px; }
+.section-title { font-size:15px; font-weight:800; color:var(--text); margin-bottom:14px; letter-spacing:-.2px; }
+.section-title span { font-size:12px; font-weight:500; color:var(--text-s); margin-left:6px; }
+.cats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.cat-item { display:flex; flex-direction:column; align-items:center; gap:7px; cursor:pointer; }
+.cat-icon { width:58px; height:58px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:26px; box-shadow:0 4px 16px rgba(0,0,0,0.06); transition:transform .2s; }
+.cat-icon:active { transform:scale(.92); }
+.cat-icon.ci1 { background:linear-gradient(140deg,#FFEEE8,#FFD9CB); }
+.cat-icon.ci2 { background:linear-gradient(140deg,#E8F3FF,#CEDFFF); }
+.cat-icon.ci3 { background:linear-gradient(140deg,#E8FFEE,#CBFFDA); }
+.cat-icon.ci4 { background:linear-gradient(140deg,#FFF8E1,#FFEDB0); }
+.cat-icon.ci5 { background:linear-gradient(140deg,#F3E8FF,#E3CBFF); }
+.cat-icon.ci6 { background:linear-gradient(140deg,#FFE4F0,#FFCCE0); }
+.cat-icon.ci7 { background:linear-gradient(140deg,#E8FAF5,#CBFAE8); }
+.cat-icon.ci8 { background:linear-gradient(140deg,#FFF4E0,#FFE5B0); }
+.cat-label { font-size:10px; font-weight:600; color:var(--text-s); text-align:center; line-height:1.3; }
+
+/* ── THERAPIST CARDS ── */
+.tc { background:#fff; border-radius:var(--r-lg); overflow:hidden; margin-bottom:14px; box-shadow:0 2px 16px rgba(0,0,0,0.06); transition:transform .2s, box-shadow .2s; }
+.tc:hover { transform:translateY(-3px); box-shadow:0 8px 32px rgba(0,0,0,0.1); }
+.tc-img { height:148px; background:linear-gradient(145deg,#fde8d8,#f0d3bd); display:flex; align-items:center; justify-content:center; font-size:54px; position:relative; }
+.tc-featured { position:absolute; top:10px; left:10px; background:linear-gradient(135deg,#FF4D1A,#FF6B3D); color:#fff; font-size:9px; font-weight:800; padding:4px 10px; border-radius:20px; box-shadow:0 3px 10px rgba(255,77,26,0.35); letter-spacing:.5px; text-transform:uppercase; z-index:2; }
+.tc-avail { position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.42); backdrop-filter:blur(12px); color:#fff; font-size:10px; padding:4px 10px; border-radius:20px; display:flex; align-items:center; gap:5px; z-index:2; }
+.tc-avail-dot { width:6px; height:6px; border-radius:50%; background:#52C41A; box-shadow:0 0 8px rgba(82,196,26,0.6); animation:blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.5} }
+.tc-body { padding:14px 16px 16px; }
+.tc-row1 { display:flex; justify-content:space-between; align-items:flex-start; }
+.tc-name { font-size:16px; font-weight:800; color:var(--text); letter-spacing:-.2px; }
+.tc-price { font-size:15px; font-weight:900; color:var(--p); }
+.tc-price small { font-size:10px; font-weight:500; color:var(--text-xs); }
+.tc-rating { display:flex; align-items:center; gap:3px; font-size:11px; color:#F59E0B; font-weight:700; margin-top:3px; }
+.tc-rating span { color:var(--text-xs); font-weight:500; font-size:10px; }
+.tc-tags { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+.tc-tag { background:#FFF2EE; color:var(--p2); font-size:10px; padding:3px 10px; border-radius:20px; font-weight:600; border:1px solid rgba(255,107,61,0.12); }
+.tc-foot { display:flex; gap:8px; margin-top:12px; }
+.tc-btn-sec { flex:1; border:1.5px solid var(--p); background:transparent; color:var(--p); border-radius:12px; padding:10px; font-size:12px; font-weight:700; cursor:pointer; }
+.tc-btn-pri { flex:2; background:linear-gradient(135deg,#FF4D1A,#FF6B3D); color:#fff; border:none; border-radius:12px; padding:10px; font-size:13px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(255,77,26,0.3); }
+
+/* ══════════════════════════════════════════
+   USER BOOKING
+══════════════════════════════════════════ */
+.book { background:#F7F8FC; display:flex; flex-direction:column; flex:1; }
+.page-hdr { background:#fff; padding:10px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #F0F1F5; flex-shrink:0; position:sticky; top:0; z-index:10; }
+.back-btn { width:32px; height:32px; border-radius:50%; background:#F5F6FA; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:15px; color:#555; }
+.page-title { font-size:16px; font-weight:800; color:var(--text); flex:1; }
+.therapist-hero { background:linear-gradient(160deg,#1A0A00 0%,#FF4D1A 50%,#FF9A6C 100%); padding:20px; display:flex; gap:16px; align-items:center; flex-shrink:0; position:relative; overflow:hidden; }
+.therapist-hero::after { content:'💆‍♀️'; position:absolute; right:-10px; bottom:-20px; font-size:80px; opacity:.12; pointer-events:none; }
+.th-avatar-lg { width:72px; height:72px; border-radius:20px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; font-size:34px; flex-shrink:0; border:2px solid rgba(255,255,255,0.3); box-shadow:0 8px 24px rgba(0,0,0,0.15); }
+.th-name-lg { font-size:18px; font-weight:800; color:#fff; }
+.th-rating-row { display:flex; align-items:center; gap:6px; margin-top:4px; }
+.th-star { color:#FFD700; font-size:12px; }
+.th-rate-val { font-size:12px; font-weight:700; color:#fff; }
+.th-rate-cnt { font-size:11px; color:rgba(255,255,255,0.65); }
+.th-tags-hero { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.th-tag-hero { font-size:10px; font-weight:600; background:rgba(255,255,255,0.2); color:#fff; padding:3px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.25); }
+.book-section { background:#fff; margin:10px 14px 0; border-radius:var(--r-md); padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+.bs-hdr { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:800; color:var(--text); margin-bottom:14px; }
+.bs-hdr-bar { width:3px; height:15px; background:linear-gradient(180deg,#FF4D1A,#FF9A6C); border-radius:2px; }
+.svc-item { border:2px solid #F0F1F5; border-radius:14px; padding:13px 14px; display:flex; align-items:center; gap:12px; cursor:pointer; margin-bottom:9px; transition:all .2s; }
+.svc-item.sel { border-color:var(--p); background:linear-gradient(135deg,#FFF8F6,#FFEEE8); box-shadow:0 4px 14px rgba(255,77,26,0.1); }
+.svc-emo { width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#FFE8DE,#FFD0BD); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.svc-info { flex:1; }
+.svc-name { font-size:14px; font-weight:700; color:var(--text); }
+.svc-dur { font-size:11px; color:var(--text-s); margin-top:2px; }
+.svc-price { font-size:15px; font-weight:900; color:var(--p); flex-shrink:0; }
+.svc-radio { width:20px; height:20px; border-radius:50%; border:2px solid #ddd; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.svc-radio.on { background:linear-gradient(135deg,#FF4D1A,#FF6B3D); border-color:transparent; }
+.svc-radio.on::after { content:'✓'; font-size:10px; color:#fff; font-weight:800; }
+.time-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+.tslot { border:1.5px solid #EAECF0; border-radius:11px; padding:10px 4px; text-align:center; cursor:pointer; font-size:12px; color:var(--text-s); font-weight:600; transition:all .2s; }
+.tslot.sel { border-color:var(--p); background:linear-gradient(135deg,#FF4D1A,#FF6B3D); color:#fff; box-shadow:0 4px 14px rgba(255,77,26,0.25); }
+.addr-box { display:flex; align-items:center; gap:12px; background:#F7F8FC; border-radius:12px; padding:12px 14px; border:1.5px solid #EAECF0; cursor:pointer; }
+.addr-icon { font-size:20px; }
+.addr-text { flex:1; font-size:13px; color:var(--text); font-weight:500; }
+.addr-arrow { color:var(--text-xs); font-size:12px; }
+.pay-notice { background:linear-gradient(135deg,#FFFBF0,#FFF5D9); border:1.5px solid rgba(245,158,11,0.25); border-radius:14px; padding:14px 16px; }
+.pay-notice-title { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:800; color:#92400E; margin-bottom:7px; }
+.pay-notice p { font-size:11px; color:#78350F; line-height:1.8; }
+.pay-notice strong { font-weight:800; }
+.book-footer { background:#fff; padding:14px 16px 22px; border-top:1px solid #F0F1F5; position:sticky; bottom:0; box-shadow:0 -4px 20px rgba(0,0,0,0.06); flex-shrink:0; }
+.bfoot-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.bfoot-total { font-size:11px; color:var(--text-s); }
+.bfoot-price { font-size:24px; font-weight:900; color:var(--p); letter-spacing:-.5px; }
+.bfoot-price small { font-size:12px; font-weight:500; color:var(--text-xs); }
+.confirm-btn { width:100%; background:linear-gradient(135deg,#FF4D1A,#FF6B3D); color:#fff; border:none; border-radius:var(--r-md); padding:15px; font-size:15px; font-weight:800; cursor:pointer; box-shadow:0 6px 22px rgba(255,77,26,0.32); letter-spacing:.3px; }
+
+/* ══════════════════════════════════════════
+   USER ORDER TRACKING
+══════════════════════════════════════════ */
+.order { background:#F7F8FC; display:flex; flex-direction:column; flex:1; }
+.order-hero { background:linear-gradient(160deg,#FF4D1A 0%,#FF6B3D 55%,#FFB085 100%); padding:20px 20px 36px; flex-shrink:0; position:relative; overflow:hidden; }
+.order-hero::after { content:''; position:absolute; bottom:-50px; right:-50px; width:180px; height:180px; background:rgba(255,255,255,0.08); border-radius:50%; pointer-events:none; }
+.oh-title { font-size:13px; font-weight:600; color:rgba(255,255,255,0.75); }
+.oh-status { font-size:24px; font-weight:900; color:#fff; margin-top:3px; letter-spacing:-.5px; }
+.oh-eta { font-size:12px; color:rgba(255,255,255,0.8); margin-top:5px; }
+.therapist-float { background:#fff; margin:-18px 14px 0; border-radius:var(--r-lg); padding:16px; box-shadow:0 8px 32px rgba(0,0,0,0.1); position:relative; z-index:2; display:flex; align-items:center; gap:14px; }
+.tf-avatar { width:50px; height:50px; border-radius:15px; background:linear-gradient(135deg,#fde8d8,#f0d3bd); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+.tf-name { font-size:15px; font-weight:800; color:var(--text); }
+.tf-sub { font-size:11px; color:var(--success); font-weight:700; margin-top:3px; }
+.tf-btns { margin-left:auto; display:flex; gap:8px; }
+.tf-btn { width:38px; height:38px; border-radius:50%; border:1.5px solid #EAECF0; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.04); font-size:16px; }
+.steps-card { background:#fff; margin:12px 14px 0; border-radius:var(--r-md); padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+.step-row { display:flex; gap:12px; }
+.step-icon-col { display:flex; flex-direction:column; align-items:center; }
+.step-ico { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0; }
+.step-ico.done { background:linear-gradient(135deg,#10B981,#34D399); color:#fff; box-shadow:0 3px 10px rgba(16,185,129,0.3); }
+.step-ico.active { background:linear-gradient(135deg,#FF4D1A,#FF6B3D); color:#fff; box-shadow:0 3px 10px rgba(255,77,26,0.3); animation:pulse-step 2s infinite; }
+.step-ico.pend { background:#F3F4F8; color:#C8CDD9; }
+@keyframes pulse-step { 0%,100%{box-shadow:0 3px 10px rgba(255,77,26,0.3)} 50%{box-shadow:0 3px 18px rgba(255,77,26,0.5)} }
+.step-line { width:2px; flex:1; min-height:16px; margin:3px 0; border-radius:2px; }
+.step-line.done { background:linear-gradient(180deg,#10B981,#34D399); }
+.step-line.pend { background:#F0F1F5; }
+.step-content { padding-bottom:18px; flex:1; }
+.step-title { font-size:13px; font-weight:700; color:var(--text); }
+.step-sub { font-size:11px; color:var(--text-s); margin-top:3px; line-height:1.5; }
+.step-time { font-size:10px; color:var(--p); font-weight:700; margin-top:3px; }
+.cash-alert { background:linear-gradient(135deg,#FFFBF0,#FFF5D9); border:1.5px solid rgba(245,158,11,0.3); border-radius:14px; padding:14px 16px; margin:12px 14px 14px; }
+.ca-title { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:800; color:#92400E; margin-bottom:6px; }
+.ca-amount { font-size:26px; font-weight:900; color:#FF4D1A; }
+.ca-note { font-size:11px; color:#78350F; margin-top:4px; line-height:1.6; }
+
+/* ══════════════════════════════════════════
+   THERAPIST HOME
+══════════════════════════════════════════ */
+.thome { background:#F7F8FC; display:flex; flex-direction:column; flex:1; }
+.th-hero { background:linear-gradient(160deg,#0D1B2A 0%,#1E3A5F 40%,#2D5F8A 100%); padding:18px 20px 24px; flex-shrink:0; position:relative; overflow:hidden; }
+.th-hero::after { content:''; position:absolute; bottom:-60px; right:-60px; width:200px; height:200px; background:rgba(255,255,255,0.05); border-radius:50%; pointer-events:none; }
+.th-toprow { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; }
+.th-greet { font-size:11px; color:rgba(255,255,255,0.55); font-weight:500; }
+.th-name { font-size:19px; font-weight:800; color:#fff; margin-top:2px; }
+.th-status-badge { font-size:10px; font-weight:700; background:rgba(82,196,26,0.2); color:#73D13D; padding:4px 10px; border-radius:20px; border:1px solid rgba(82,196,26,0.3); margin-top:5px; display:inline-flex; align-items:center; gap:5px; }
+.th-status-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:#52C41A; box-shadow:0 0 6px rgba(82,196,26,0.6); }
+.th-notif { width:40px; height:40px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; border:1px solid rgba(255,255,255,0.08); position:relative; }
+.th-ndot { width:10px; height:10px; background:linear-gradient(135deg,#FF4D1A,#FF6B3D); border-radius:50%; position:absolute; top:3px; right:3px; border:2px solid #1E3A5F; }
+.th-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.th-stat { background:rgba(255,255,255,0.08); backdrop-filter:blur(10px); border-radius:14px; padding:12px 10px; border:1px solid rgba(255,255,255,0.06); text-align:center; }
+.th-stat .v { font-size:18px; font-weight:900; color:#fff; }
+.th-stat .l { font-size:9px; color:rgba(255,255,255,0.45); margin-top:2px; font-weight:600; letter-spacing:.5px; text-transform:uppercase; }
+.th-toggle-card { background:#fff; margin:0 14px; margin-top:-14px; border-radius:var(--r-md); padding:14px 18px; box-shadow:0 8px 28px rgba(0,0,0,0.1); display:flex; justify-content:space-between; align-items:center; position:relative; z-index:2; }
+.th-toggle-info .l { font-size:14px; font-weight:800; color:var(--text); }
+.th-toggle-info .s { font-size:11px; color:var(--success); font-weight:600; margin-top:3px; }
+.toggle-sw { width:50px; height:28px; background:linear-gradient(135deg,#52C41A,#73D13D); border-radius:14px; position:relative; cursor:pointer; box-shadow:0 3px 10px rgba(82,196,26,0.3); }
+.toggle-knob { width:22px; height:22px; background:#fff; border-radius:50%; position:absolute; top:3px; right:3px; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+.fee-alert-card { background:linear-gradient(135deg,#FFFBF0,#FFF5D9); border:1.5px solid rgba(245,158,11,0.25); border-radius:var(--r-md); padding:14px 16px; margin:12px 14px 0; }
+.fac-title { font-size:13px; font-weight:800; color:#92400E; margin-bottom:6px; }
+.fac-body { font-size:11px; color:#78350F; line-height:1.7; }
+.fac-btn { width:100%; background:linear-gradient(135deg,#FF4D1A,#FF6B3D); color:#fff; border:none; border-radius:11px; padding:10px; font-size:13px; font-weight:800; cursor:pointer; margin-top:10px; box-shadow:0 4px 14px rgba(255,77,26,0.28); }
+.order-card { background:#fff; border-radius:var(--r-md); padding:16px; margin-bottom:11px; box-shadow:0 2px 12px rgba(0,0,0,0.05); }
+.oc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:11px; }
+.oc-chip { font-size:10px; font-weight:800; padding:4px 11px; border-radius:20px; letter-spacing:.4px; }
+.oc-chip.new { background:#FFF0EB; color:var(--p); }
+.oc-chip.progress { background:#EBF5FF; color:var(--info); }
+.oc-title { font-size:14px; font-weight:800; color:var(--text); margin-bottom:5px; }
+.oc-meta { font-size:11px; color:var(--text-s); display:flex; align-items:center; gap:10px; }
+.oc-bottom { display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px dashed #EAECF0; margin-top:10px; }
+.oc-fee-info { font-size:11px; color:var(--text-s); line-height:1.6; }
+.oc-fee-info b { color:var(--p); font-size:13px; }
+.oc-actions { display:flex; gap:7px; }
+.oc-btn-o { border:1.5px solid var(--p); background:#fff; color:var(--p); font-size:11px; font-weight:800; padding:7px 13px; border-radius:10px; cursor:pointer; }
+.oc-btn-f { background:linear-gradient(135deg,#FF4D1A,#FF6B3D); color:#fff; border:none; font-size:11px; font-weight:800; padding:7px 13px; border-radius:10px; cursor:pointer; box-shadow:0 3px 10px rgba(255,77,26,0.28); }
+
+/* ══════════════════════════════════════════
+   FEE PAYMENT
+══════════════════════════════════════════ */
+.fee { background:#F7F8FC; display:flex; flex-direction:column; flex:1; }
+.fee-warn-bar { background:linear-gradient(135deg,#FFFBF0,#FFF0D0); padding:10px 16px; font-size:11px; color:#92400E; display:flex; align-items:center; gap:7px; font-weight:600; border-bottom:1px solid rgba(245,158,11,0.2); flex-shrink:0; }
+.fee-order { background:#fff; margin:12px 14px 0; border-radius:var(--r-md); padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+.feo-label { font-size:11px; color:var(--text-xs); letter-spacing:.5px; text-transform:uppercase; margin-bottom:7px; }
+.feo-svc { font-size:16px; font-weight:800; color:var(--text); margin-bottom:14px; }
+.feo-stats { display:flex; justify-content:space-between; padding-top:14px; border-top:1px solid #F3F4F8; }
+.feo-stat { text-align:center; flex:1; }
+.feo-stat .v { font-size:14px; font-weight:800; color:var(--text); }
+.feo-stat .l { font-size:10px; color:var(--text-xs); margin-top:3px; }
+.fee-calc { background:#fff; margin:10px 14px 0; border-radius:var(--r-md); padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+.fee-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; }
+.fee-row .k { font-size:12px; color:var(--text-s); }
+.fee-row .v { font-size:13px; font-weight:600; color:var(--text); }
+.fee-row.total { border-top:2px solid #F3F4F8; padding-top:12px; margin-top:6px; }
+.fee-row.total .k { font-size:14px; font-weight:800; color:var(--text); }
+.fee-row.total .v { font-size:22px; font-weight:900; color:var(--p); }
+.fee-amount-box { margin-top:12px; background:linear-gradient(135deg,#FFF5F2,#FFEEE8); border:2px solid rgba(255,77,26,0.18); border-radius:14px; padding:14px; text-align:center; }
+.fab-label { font-size:11px; color:var(--text-s); margin-bottom:4px; }
+.fab-value { font-size:30px; font-weight:900; color:var(--p); letter-spacing:-1px; }
+.fee-bank { background:#fff; margin:10px 14px 0; border-radius:var(--r-md); padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+.bank-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid #F3F4F8; }
+.bank-row:last-child { border:none; }
+.bank-row .k { font-size:12px; color:var(--text-s); }
+.bank-row .v { font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+.copy-btn { font-size:10px; background:#F3F4F8; border:none; padding:3px 9px; border-radius:6px; cursor:pointer; color:var(--text-s); font-weight:600; }
+.fee-upload { background:#fff; margin:10px 14px 0; border-radius:var(--r-md); padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+.upload-area { border:2px dashed rgba(255,107,61,0.3); border-radius:14px; padding:24px; text-align:center; cursor:pointer; background:#FFFAF8; }
+.ua-ico { font-size:32px; margin-bottom:8px; }
+.ua-title { font-size:13px; font-weight:700; color:var(--text-s); }
+.ua-sub { font-size:11px; color:var(--text-xs); margin-top:4px; }
+.fee-footer { background:#fff; padding:14px 16px 22px; border-top:1px solid #F0F1F5; position:sticky; bottom:0; box-shadow:0 -4px 20px rgba(0,0,0,0.06); flex-shrink:0; }
+.fee-warn-text { font-size:11px; color:#EF4444; text-align:center; margin-bottom:10px; font-weight:600; }
+.submit-btn { width:100%; background:linear-gradient(135deg,#FF4D1A,#FF6B3D); color:#fff; border:none; border-radius:var(--r-md); padding:15px; font-size:15px; font-weight:800; cursor:pointer; box-shadow:0 6px 22px rgba(255,77,26,0.32); }
+
+/* ══════════════════════════════════════════
+   ADMIN DASHBOARD
+══════════════════════════════════════════ */
+.admin { background:#F0F2F5; display:flex; flex-direction:column; flex:1; }
+.admin-hero { background:linear-gradient(160deg,#0D1B2A 0%,#1E3A5F 50%,#2D5F8A 100%); padding:18px 18px 22px; flex-shrink:0; }
+.admin-hdr-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; }
+.admin-title { font-size:16px; font-weight:800; color:#fff; }
+.admin-sub { font-size:11px; color:rgba(255,255,255,0.5); margin-top:2px; }
+.admin-date-chip { font-size:10px; background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.7); padding:4px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.12); }
+.admin-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.astat { background:rgba(255,255,255,0.08); backdrop-filter:blur(10px); border-radius:14px; padding:13px; border:1px solid rgba(255,255,255,0.06); }
+.astat .v { font-size:22px; font-weight:900; color:#fff; }
+.astat .l { font-size:9px; color:rgba(255,255,255,0.45); margin-top:2px; text-transform:uppercase; letter-spacing:.5px; }
+.astat .trend { font-size:10px; margin-top:5px; font-weight:700; }
+.astat .trend.up { color:#52C41A; }
+.astat .trend.dw { color:#FF4D4F; }
+.admin-section { background:#fff; margin:10px 12px 0; border-radius:var(--r-md); overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+.admin-sec-hdr { padding:13px 16px; font-size:14px; font-weight:800; color:var(--text); border-bottom:1px solid #F3F4F8; display:flex; justify-content:space-between; align-items:center; }
+.admin-sec-hdr span { font-size:11px; color:var(--p); font-weight:700; }
+.fee-pending-row { padding:12px 16px; border-bottom:1px solid #F3F4F8; display:flex; align-items:center; justify-content:space-between; }
+.fpr-info .name { font-size:13px; font-weight:700; color:var(--text); }
+.fpr-info .time { font-size:10px; color:var(--text-s); margin-top:2px; }
+.fpr-right { display:flex; align-items:center; gap:10px; }
+.fpr-amount { font-size:14px; font-weight:900; color:var(--p); }
+.status-chip { font-size:9px; font-weight:800; padding:4px 10px; border-radius:20px; letter-spacing:.4px; text-transform:uppercase; }
+.sc-pend { background:#FFF3E0; color:#E65100; }
+.sc-review { background:#EBF5FF; color:var(--info); }
+.sc-paid { background:#F0FFF4; color:var(--success); }
+.fee-setting-row { padding:11px 16px; border-bottom:1px solid #F3F4F8; display:flex; justify-content:space-between; align-items:center; }
+.fsr-label { font-size:13px; color:var(--text-s); font-weight:500; }
+.fsr-val { font-size:14px; font-weight:900; color:var(--p); background:#FFF0EB; padding:4px 14px; border-radius:20px; }
+.shop-row { padding:11px 16px; border-bottom:1px solid #F3F4F8; display:flex; align-items:center; gap:12px; }
+.shop-ico { width:38px; height:38px; border-radius:11px; background:linear-gradient(135deg,#FFF0EB,#FFD9C2); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+.shop-info .n { font-size:13px; font-weight:700; color:var(--text); }
+.shop-info .s { font-size:10px; color:var(--text-s); margin-top:2px; }
+.shop-status-chip { font-size:9px; font-weight:800; padding:4px 9px; border-radius:20px; margin-left:auto; }
+.ssc-active { background:#F0FFF4; color:var(--success); }
+.ssc-pending { background:#EBF5FF; color:var(--info); }
+
+/* ── LANG CONTROL ── */
+[data-zh],[data-en],[data-th] { display:none; }
+body.lz [data-zh] { display:inline; }
+body.le [data-en] { display:inline; }
+body.lt [data-th] { display:inline; }
+[data-zh-b],[data-en-b],[data-th-b] { display:none; }
+body.lz [data-zh-b] { display:block; }
+body.le [data-en-b] { display:block; }
+body.lt [data-th-b] { display:block; }
+
+</style>
+</head>
+<body class="lz">
+
+<!-- LANG BAR -->
+<div class="lang-bar">
+  <span style="font-size:13px;">🌐</span>
+  <button class="lang-btn active" onclick="setLang('lz')">中文</button>
+  <button class="lang-btn" onclick="setLang('le')">English</button>
+  <button class="lang-btn" onclick="setLang('lt')">ภาษาไทย</button>
+  <span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:8px;">📍 ວຽງຈັນ · Vientiane · เวียงจันทน์</span>
+</div>
+
+<!-- APP TOP BAR -->
+<div class="app-topbar">
+  <div class="app-logo">🛎️ <span data-zh>舒摩到家</span><span data-en>RelaxHome</span><span data-th>RelaxHome</span></div>
+  <div class="app-badge">MVP v2.0</div>
+</div>
+
+<!-- PAGE TAB NAV -->
+<div class="tab-nav" id="tabNav">
+  <button class="active" onclick="sw('t1')"><span data-zh>用戶·首頁</span><span data-en>User·Home</span><span data-th>ผู้ใช้·หน้าหลัก</span></button>
+  <button onclick="sw('t2')"><span data-zh>用戶·預約</span><span data-en>User·Book</span><span data-th>ผู้ใช้·จอง</span></button>
+  <button onclick="sw('t3')"><span data-zh>用戶·訂單</span><span data-en>User·Order</span><span data-th>ผู้ใช้·คำสั่ง</span></button>
+  <button onclick="sw('t4')"><span data-zh>技師·首頁</span><span data-en>Therapist·Home</span><span data-th>นักนวด·หน้าหลัก</span></button>
+  <button onclick="sw('t5')"><span data-zh>技師·繳費</span><span data-en>Therapist·Fee</span><span data-th>นักนวด·ชำระ</span></button>
+  <button onclick="sw('t6')"><span data-zh>後台·總覽</span><span data-en>Admin·Overview</span><span data-th>แอดมิน·ภาพรวม</span></button>
+</div>
+
+<div class="screens-wrap">
+
+<!-- ████████████████████████████████████████
+  TAB 1: USER HOME
+████████████████████████████████████████ -->
+<div class="tab-panel active" id="t1">
+  <div class="phone-col">
+    <div class="phone-label" data-zh>用戶端 · 首頁</div>
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <!-- status bar -->
+        <div class="sb" style="background:transparent;position:absolute;top:28px;left:0;right:0;z-index:5;padding:4px 20px;">
+          <span class="t" style="color:#fff;">14:12</span>
+          <span class="icons" style="color:rgba(255,255,255,0.8);">📶 🔋</span>
+        </div>
+
+        <div class="uh" style="min-height:100%;">
+          <!-- Hero -->
+          <div class="uh-hero" style="padding-top:38px;">
+            <div class="uh-toprow">
+              <div>
+                <div class="uh-greeting"><span data-zh>下午好 👋</span><span data-en>Good Afternoon 👋</span><span data-th>สวัสดีตอนบ่าย 👋</span></div>
+                <div class="uh-name"><span data-zh>李小姐</span><span data-en>Ms. Li</span><span data-th>คุณหลี่</span></div>
+                <div class="uh-loc">📍 <span data-zh>ວຽງຈັນ · 萬象</span><span data-en>Vientiane, Laos</span><span data-th>เวียงจันทน์ ลาว</span></div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div class="uh-msgbell"><div class="uh-avatar">🔔</div><div class="uh-dot"></div></div>
+                <div class="uh-avatar">👤</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Banner -->
+          <div class="uh-banner">
+            <div class="banner-track" id="bt">
+              <div class="bslide"><div class="bslide-bg" style="background:linear-gradient(135deg,#FF4D1A,#FF9A6C);"></div>
+                <div class="bslide-deco">💆‍♀️</div>
+                <div class="bslide-content">
+                  <span class="bslide-chip"><span data-zh>限時特惠</span><span data-en>LIMITED</span><span data-th>โปรพิเศษ</span></span>
+                  <div>
+                    <div class="bslide-title"><span data-zh>首次體驗</span><span data-en>First Time</span><span data-th>ครั้งแรก</span><br><span style="font-size:24px;font-weight:900;">8<span data-zh>折優惠</span><span data-en>% OFF</span><span data-th>% ลด</span></span></div>
+                    <div class="bslide-sub">₭150,000 → <strong>₭120,000</strong></div>
+                  </div>
+                  <button class="bslide-cta" style="color:#FF4D1A;"><span data-zh>立即搶購 →</span><span data-en>Grab Now →</span><span data-th>จองเลย →</span></button>
+                </div>
+              </div>
+              <div class="bslide"><div class="bslide-bg" style="background:linear-gradient(135deg,#0A4D2E,#1A7A4E,#2DB877);"></div>
+                <div class="bslide-deco">🌿</div>
+                <div class="bslide-content">
+                  <span class="bslide-chip"><span data-zh>本週推薦</span><span data-en>THIS WEEK</span><span data-th>แนะนำสัปดาห์นี้</span></span>
+                  <div>
+                    <div class="bslide-title"><span data-zh>泰式按摩</span><span data-en>Thai Massage</span><span data-th>นวดไทย</span><br><span data-zh>含精油套餐</span><span data-en>Oil Package</span><span data-th>พร้อมน้ำมัน</span></div>
+                    <div class="bslide-sub">60<span data-zh>分鐘</span><span data-en>min</span><span data-th>น.</span> · <strong>₭130,000</strong></div>
+                  </div>
+                  <button class="bslide-cta" style="color:#0A4D2E;"><span data-zh>了解詳情 →</span><span data-en>Learn More →</span><span data-th>ดูเพิ่ม →</span></button>
+                </div>
+              </div>
+              <div class="bslide"><div class="bslide-bg" style="background:linear-gradient(135deg,#2D1B69,#4A2BA8,#6B46D4);"></div>
+                <div class="bslide-deco">⭐</div>
+                <div class="bslide-content">
+                  <span class="bslide-chip"><span data-zh>會員方案</span><span data-en>VIP PASS</span><span data-th>สมาชิก VIP</span></span>
+                  <div>
+                    <div class="bslide-title"><span data-zh>月卡套餐</span><span data-en>Monthly Pass</span><span data-th>แพ็กเกจรายเดือน</span><br><span data-zh>每月 4 次</span><span data-en>4x / Month</span><span data-th>4 ครั้ง/เดือน</span></div>
+                    <div class="bslide-sub"><strong>₭480,000</strong> · <span data-zh>省₭120,000</span><span data-en>Save ₭120,000</span><span data-th>ประหยัด₭120,000</span></div>
+                  </div>
+                  <button class="bslide-cta" style="color:#2D1B69;"><span data-zh>立即開通 →</span><span data-en>Subscribe →</span><span data-th>สมัครเลย →</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="banner-dots" id="bd"><span class="active" onclick="gb(0)"></span><span onclick="gb(1)"></span><span onclick="gb(2)"></span></div>
+          </div>
+
+          <!-- Categories -->
+          <div class="uh-section">
+            <div class="section-title"><span data-zh>服務項目</span><span data-en>Services</span><span data-th>บริการ</span> <span><span data-zh>全部 →</span><span data-en>All →</span><span data-th>ทั้งหมด →</span></span></div>
+            <div class="cats-grid">
+              <div class="cat-item"><div class="cat-icon ci1">💆</div><div class="cat-label"><span data-zh>全身按摩</span><span data-en>Full Body</span><span data-th>นวดทั้งตัว</span></div></div>
+              <div class="cat-item"><div class="cat-icon ci2">🤸</div><div class="cat-label"><span data-zh>泰式按摩</span><span data-en>Thai</span><span data-th>นวดไทย</span></div></div>
+              <div class="cat-item"><div class="cat-icon ci3">🌿</div><div class="cat-label"><span data-zh>精油按摩</span><span data-en>Aroma</span><span data-th>นวดน้ำมัน</span></div></div>
+              <div class="cat-item"><div class="cat-icon ci4">🦶</div><div class="cat-label"><span data-zh>足部按摩</span><span data-en>Foot</span><span data-th>นวดเท้า</span></div></div>
+              <div class="cat-item"><div class="cat-icon ci5">🤰</div><div class="cat-label"><span data-zh>孕婦按摩</span><span data-en>Prenatal</span><span data-th>นวดคนท้อง</span></div></div>
+              <div class="cat-item"><div class="cat-icon ci6">💑</div><div class="cat-label"><span data-zh>情侶套餐</span><span data-en>Couples</span><span data-th>คู่รัก</span></div></div>
+              <div class="cat-item"><div class="cat-icon ci7">🧠</div><div class="cat-label"><span data-zh>頭部按摩</span><span data-en>Head</span><span data-th>นวดศีรษะ</span></div></div>
+              <div class="cat-item"><div class="cat-icon ci8">🔥</div><div class="cat-label"><span data-zh>熱石按摩</span><span data-en>Hot Stone</span><span data-th>หินร้อน</span></div></div>
+            </div>
+          </div>
+
+          <!-- Nearby Therapists -->
+          <div class="uh-section" style="padding-top:4px;">
+            <div class="section-title"><span data-zh>附近技師</span><span data-en>Nearby</span><span data-th>นักนวดใกล้คุณ</span> <span><span data-zh>更多 →</span><span data-en>More →</span><span data-th>ดูเพิ่ม →</span></span></div>
+
+            <div class="tc">
+              <div class="tc-img">
+                <span>👩‍⚕️</span>
+                <div class="tc-featured">⭐ <span data-zh>精選</span><span data-en>TOP</span><span data-th>แนะนำ</span></div>
+                <div class="tc-avail"><div class="tc-avail-dot"></div><span data-zh>空閒中</span><span data-en>Available</span><span data-th>ว่าง</span></div>
+              </div>
+              <div class="tc-body">
+                <div class="tc-row1">
+                  <div class="tc-name">Nana · 娜娜</div>
+                  <div>
+                    <div class="tc-price">₭150,000<small>/60<span data-zh>分</span><span data-en>m</span></small></div>
+                  </div>
+                </div>
+                <div class="tc-rating">★★★★★ <span>4.9 (128<span data-zh>評)</span><span data-en> reviews)</span>)</span> · <span style="color:#888;">0.8km</span></div>
+                <div class="tc-tags">
+                  <span class="tc-tag"><span data-zh>全身</span><span data-en>Full Body</span><span data-th>ทั้งตัว</span></span>
+                  <span class="tc-tag"><span data-zh>泰式</span><span data-en>Thai</span><span data-th>ไทย</span></span>
+                  <span class="tc-tag"><span data-zh>精油</span><span data-en>Aroma</span><span data-th>น้ำมัน</span></span>
+                </div>
+                <div class="tc-foot">
+                  <button class="tc-btn-sec"><span data-zh>查看資料</span><span data-en>Profile</span><span data-th>โปรไฟล์</span></button>
+                  <button class="tc-btn-pri"><span data-zh>立即預約</span><span data-en>Book Now</span><span data-th>จองเลย</span></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="tc">
+              <div class="tc-img" style="background:linear-gradient(145deg,#d8e8de,#c4d8ca);">
+                <span>🧑‍⚕️</span>
+                <div class="tc-avail"><div class="tc-avail-dot"></div><span data-zh>空閒中</span><span data-en>Available</span><span data-th>ว่าง</span></div>
+              </div>
+              <div class="tc-body">
+                <div class="tc-row1">
+                  <div class="tc-name">Khamphet</div>
+                  <div><div class="tc-price">₭130,000<small>/60<span data-zh>分</span><span data-en>m</span></small></div></div>
+                </div>
+                <div class="tc-rating">★★★★☆ <span>4.7 (86<span data-zh>評)</span><span data-en> reviews)</span>)</span> · <span style="color:#888;">1.2km</span></div>
+                <div class="tc-tags">
+                  <span class="tc-tag"><span data-zh>泰式</span><span data-en>Thai</span><span data-th>ไทย</span></span>
+                  <span class="tc-tag"><span data-zh>足部</span><span data-en>Foot</span><span data-th>เท้า</span></span>
+                </div>
+                <div class="tc-foot">
+                  <button class="tc-btn-sec"><span data-zh>查看資料</span><span data-en>Profile</span><span data-th>โปรไฟล์</span></button>
+                  <button class="tc-btn-pri"><span data-zh>立即預約</span><span data-en>Book Now</span><span data-th>จองเลย</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:20px;"></div>
+        </div><!-- /uh -->
+
+        <!-- Bottom Nav -->
+        <div class="bnav">
+          <a class="on"><div class="ico">🏠</div><span data-zh>首頁</span><span data-en>Home</span><span data-th>หน้าหลัก</span></a>
+          <a><div class="ico">🗓️</div><span data-zh>預約</span><span data-en>Book</span><span data-th>จอง</span></a>
+          <a><div class="ico">📋</div><span data-zh>訂單</span><span data-en>Orders</span><span data-th>คำสั่ง</span></a>
+          <a><div class="ico">💬</div><span data-zh>消息</span><span data-en>Chat</span><span data-th>ข้อความ</span></a>
+          <a><div class="ico">👤</div><span data-zh>我的</span><span data-en>Me</span><span data-th>ฉัน</span></a>
+        </div>
+      </div><!-- /phone-screen -->
+    </div><!-- /phone-frame -->
+  </div>
+</div><!-- /t1 -->
+
+<!-- ████████████████████████████████████████
+  TAB 2: USER BOOK
+████████████████████████████████████████ -->
+<div class="tab-panel" id="t2">
+  <div class="phone-col">
+    <div class="phone-label"><span data-zh>用戶端 · 預約頁</span><span data-en>User · Booking</span></div>
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="sb"><span class="t">14:12</span><span class="icons">📶 🔋</span></div>
+
+        <div class="book" style="min-height:100%;padding-bottom:90px;">
+          <!-- Therapist Hero -->
+          <div class="therapist-hero">
+            <div class="th-avatar-lg">👩‍⚕️</div>
+            <div>
+              <div class="th-name-lg">Nana · 娜娜</div>
+              <div class="th-rating-row">
+                <span class="th-star">★★★★★</span>
+                <span class="th-rate-val">4.9</span>
+                <span class="th-rate-cnt">(128)</span>
+              </div>
+              <div class="th-tags-hero">
+                <span class="th-tag-hero"><span data-zh>全身</span><span data-en>Full Body</span><span data-th>ทั้งตัว</span></span>
+                <span class="th-tag-hero"><span data-zh>泰式</span><span data-en>Thai</span><span data-th>ไทย</span></span>
+                <span class="th-tag-hero"><span data-zh>精油</span><span data-en>Aroma</span><span data-th>น้ำมัน</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Service Selection -->
+          <div class="book-section">
+            <div class="bs-hdr"><div class="bs-hdr-bar"></div><span data-zh>選擇服務</span><span data-en>Select Service</span><span data-th>เลือกบริการ</span></div>
+            <div class="svc-item sel">
+              <div class="svc-emo">💆</div>
+              <div class="svc-info"><div class="svc-name"><span data-zh>全身按摩</span><span data-en>Full Body Massage</span><span data-th>นวดทั้งตัว</span></div><div class="svc-dur">60 <span data-zh>分鐘</span><span data-en>min</span><span data-th>น.</span></div></div>
+              <div class="svc-price">₭150,000</div>
+              <div class="svc-radio on"></div>
+            </div>
+            <div class="svc-item">
+              <div class="svc-emo">💆</div>
+              <div class="svc-info"><div class="svc-name"><span data-zh>全身按摩</span><span data-en>Full Body Massage</span><span data-th>นวดทั้งตัว</span></div><div class="svc-dur">90 <span data-zh>分鐘</span><span data-en>min</span><span data-th>น.</span></div></div>
+              <div class="svc-price">₭210,000</div>
+              <div class="svc-radio"></div>
+            </div>
+            <div class="svc-item">
+              <div class="svc-emo">🌿</div>
+              <div class="svc-info"><div class="svc-name"><span data-zh>精油按摩</span><span data-en>Aromatherapy</span><span data-th>นวดน้ำมัน</span></div><div class="svc-dur">60 <span data-zh>分鐘</span><span data-en>min</span><span data-th>น.</span></div></div>
+              <div class="svc-price">₭170,000</div>
+              <div class="svc-radio"></div>
+            </div>
+          </div>
+
+          <!-- Time Selection -->
+          <div class="book-section">
+            <div class="bs-hdr"><div class="bs-hdr-bar"></div><span data-zh>選擇時間</span><span data-en>Select Time</span><span data-th>เลือกเวลา</span></div>
+            <div style="font-size:11px;color:#999;margin-bottom:10px;font-weight:500;">
+              <span data-zh>今天 · 2026年6月17日</span><span data-en>Today · June 17, 2026</span><span data-th>วันนี้ · 17 มิ.ย. 2026</span>
+            </div>
+            <div class="time-grid">
+              <div class="tslot">14:00</div>
+              <div class="tslot">15:00</div>
+              <div class="tslot sel">16:00</div>
+              <div class="tslot">17:00</div>
+              <div class="tslot">18:00</div>
+              <div class="tslot" style="color:#C8CDD9;border-color:#F3F4F8;cursor:not-allowed;"><span data-zh>已滿</span><span data-en>Full</span><span data-th>เต็ม</span></div>
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="book-section">
+            <div class="bs-hdr"><div class="bs-hdr-bar"></div><span data-zh>上門地址</span><span data-en>Address</span><span data-th>ที่อยู่</span></div>
+            <div class="addr-box">
+              <div class="addr-icon">📍</div>
+              <div class="addr-text">Ban Dong Rd, Unit 4B, Xaysettha</div>
+              <div class="addr-arrow">›</div>
+            </div>
+          </div>
+
+          <!-- Payment Notice -->
+          <div class="book-section">
+            <div class="bs-hdr"><div class="bs-hdr-bar" style="background:linear-gradient(180deg,#F59E0B,#FBBF24);"></div><span data-zh>付款方式</span><span data-en>Payment</span><span data-th>การชำระเงิน</span></div>
+            <div class="pay-notice">
+              <div class="pay-notice-title">💵 <span data-zh>現場現金付款</span><span data-en>Cash on Service</span><span data-th>จ่ายสดเมื่อรับบริการ</span></div>
+              <p>
+                <span data-zh>✅ 無需線上預付，服務完成後<strong>現場付現金</strong>給技師<br>💰 本次服務費用：<strong>₭150,000</strong><br>📌 請提前準備好現金，技師不提供找零服務</span>
+                <span data-en>✅ No prepayment needed. Pay <strong>cash</strong> to therapist after service.<br>💰 Service fee: <strong>₭150,000</strong><br>📌 Please prepare exact change</span>
+                <span data-th>✅ ไม่ต้องจ่ายล่วงหน้า จ่าย<strong>เงินสด</strong>ให้นักนวดหลังบริการ<br>💰 ค่าบริการ: <strong>₭150,000</strong></span>
+              </p>
+            </div>
+          </div>
+        </div><!-- /book -->
+
+        <!-- Book Footer -->
+        <div class="book-footer">
+          <div class="bfoot-row">
+            <div><div class="bfoot-total"><span data-zh>服務費用</span><span data-en>Total</span><span data-th>ราคารวม</span></div><div class="bfoot-price">₭150,000 <small><span data-zh>現金</span><span data-en>Cash</span><span data-th>เงินสด</span></small></div></div>
+          </div>
+          <button class="confirm-btn"><span data-zh>確認預約</span><span data-en>Confirm Booking</span><span data-th>ยืนยันการจอง</span></button>
+        </div>
+
+        <div class="bnav">
+          <a><div class="ico">🏠</div><span data-zh>首頁</span><span data-en>Home</span></a>
+          <a class="on"><div class="ico">🗓️</div><span data-zh>預約</span><span data-en>Book</span></a>
+          <a><div class="ico">📋</div><span data-zh>訂單</span><span data-en>Orders</span></a>
+          <a><div class="ico">💬</div><span data-zh>消息</span><span data-en>Chat</span></a>
+          <a><div class="ico">👤</div><span data-zh>我的</span><span data-en>Me</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /t2 -->
+
+<!-- ████████████████████████████████████████
+  TAB 3: USER ORDER TRACKING
+████████████████████████████████████████ -->
+<div class="tab-panel" id="t3">
+  <div class="phone-col">
+    <div class="phone-label"><span data-zh>用戶端 · 訂單追蹤</span><span data-en>User · Order</span></div>
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="sb" style="background:transparent;position:absolute;top:28px;left:0;right:0;z-index:5;padding:4px 20px;">
+          <span class="t" style="color:#fff;">14:12</span>
+          <span class="icons" style="color:rgba(255,255,255,0.8);">📶 🔋</span>
+        </div>
+        <div class="order" style="min-height:100%;padding-bottom:80px;">
+          <!-- Order Hero -->
+          <div class="order-hero" style="padding-top:40px;">
+            <div class="oh-title"><span data-zh>訂單狀態</span><span data-en>Order Status</span><span data-th>สถานะคำสั่ง</span></div>
+            <div class="oh-status"><span data-zh>技師前往中</span><span data-en>Therapist On The Way</span><span data-th>นักนวดกำลังเดินทาง</span> 🚗</div>
+            <div class="oh-eta"><span data-zh>預計抵達：</span><span data-en>ETA: </span><span data-th>ถึงใน: </span><strong style="color:#fff;">15 <span data-zh>分鐘</span><span data-en>min</span><span data-th>น.</span></strong></div>
+          </div>
+
+          <!-- Therapist Float Card -->
+          <div class="therapist-float">
+            <div class="tf-avatar">👩‍⚕️</div>
+            <div>
+              <div class="tf-name">Nana · 娜娜</div>
+              <div class="tf-sub">🟢 <span data-zh>正在前往您所在位置</span><span data-en>Heading to your location</span><span data-th>กำลังมาหาคุณ</span></div>
+            </div>
+            <div class="tf-btns">
+              <div class="tf-btn">📞</div>
+              <div class="tf-btn">💬</div>
+            </div>
+          </div>
+
+          <!-- Progress Steps -->
+          <div class="steps-card">
+            <div class="step-row"><div class="step-icon-col"><div class="step-ico done">✓</div><div class="step-line done"></div></div><div class="step-content"><div class="step-title"><span data-zh>預約成功</span><span data-en>Booking Confirmed</span><span data-th>ยืนยันการจอง</span></div><div class="step-time">14:05</div></div></div>
+            <div class="step-row"><div class="step-icon-col"><div class="step-ico done">✓</div><div class="step-line done"></div></div><div class="step-content"><div class="step-title"><span data-zh>技師已接單</span><span data-en>Accepted</span><span data-th>รับงานแล้ว</span></div><div class="step-sub">Nana · 娜娜</div><div class="step-time">14:07</div></div></div>
+            <div class="step-row"><div class="step-icon-col"><div class="step-ico active">🚗</div><div class="step-line pend"></div></div><div class="step-content"><div class="step-title"><span data-zh>技師前往中</span><span data-en>On The Way</span><span data-th>กำลังเดินทาง</span></div><div class="step-sub"><span data-zh>預計 15 分鐘抵達</span><span data-en>ETA 15 min</span></div></div></div>
+            <div class="step-row"><div class="step-icon-col"><div class="step-ico pend">4</div><div class="step-line pend"></div></div><div class="step-content"><div class="step-title" style="color:#C8CDD9;"><span data-zh>服務進行中</span><span data-en>In Service</span><span data-th>กำลังให้บริการ</span></div></div></div>
+            <div class="step-row"><div class="step-icon-col"><div class="step-ico pend">5</div></div><div class="step-content"><div class="step-title" style="color:#C8CDD9;"><span data-zh>服務完成 · 請付現金</span><span data-en>Done · Pay Cash</span><span data-th>เสร็จแล้ว · จ่ายเงินสด</span></div></div></div>
+          </div>
+
+          <!-- Cash Reminder -->
+          <div class="cash-alert">
+            <div class="ca-title">💵 <span data-zh>請準備現金</span><span data-en>Prepare Cash</span><span data-th>เตรียมเงินสด</span></div>
+            <div class="ca-amount">₭150,000</div>
+            <div class="ca-note"><span data-zh>服務完成後，請直接將現金付給技師。<br>技師將收到款項後繳交平台服務費。</span><span data-en>After service, pay cash directly to therapist.<br>Therapist will remit platform fee afterward.</span><span data-th>หลังบริการ ชำระเงินสดให้นักนวดโดยตรง</span></div>
+          </div>
+
+          <!-- Order Info -->
+          <div class="book-section" style="margin:0 14px 14px;">
+            <div class="bs-hdr"><div class="bs-hdr-bar"></div><span data-zh>訂單詳情</span><span data-en>Order Details</span><span data-th>รายละเอียด</span></div>
+            <div class="fee-row"><span class="k"><span data-zh>訂單號</span><span data-en>Order ID</span></span><span class="v" style="font-size:11px;color:#999;">#VTE20260617001</span></div>
+            <div class="fee-row"><span class="k"><span data-zh>服務</span><span data-en>Service</span></span><span class="v"><span data-zh>全身按摩 60分鐘</span><span data-en>Full Body 60min</span></span></div>
+            <div class="fee-row"><span class="k"><span data-zh>地址</span><span data-en>Address</span></span><span class="v" style="font-size:11px;">Ban Dong Rd, 4B</span></div>
+            <div class="fee-row"><span class="k"><span data-zh>付款</span><span data-en>Payment</span></span><span class="v" style="color:var(--warning);font-weight:800;"><span data-zh>現場現金</span><span data-en>Cash</span></span></div>
+          </div>
+        </div>
+        <div class="bnav">
+          <a><div class="ico">🏠</div><span data-zh>首頁</span></a>
+          <a><div class="ico">🗓️</div><span data-zh>預約</span></a>
+          <a class="on"><div class="ico">📋</div><span data-zh>訂單</span></a>
+          <a><div class="ico">💬</div><span data-zh>消息</span></a>
+          <a><div class="ico">👤</div><span data-zh>我的</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /t3 -->
+
+<!-- ████████████████████████████████████████
+  TAB 4: THERAPIST HOME
+████████████████████████████████████████ -->
+<div class="tab-panel" id="t4">
+  <div class="phone-col">
+    <div class="phone-label"><span data-zh>技師端 · 首頁</span><span data-en>Therapist · Home</span></div>
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="sb" style="background:transparent;position:absolute;top:28px;left:0;right:0;z-index:5;padding:4px 20px;">
+          <span class="t" style="color:#fff;">14:12</span>
+          <span class="icons" style="color:rgba(255,255,255,0.8);">📶 🔋</span>
+        </div>
+        <div class="thome" style="min-height:100%;padding-bottom:80px;">
+          <!-- Hero -->
+          <div class="th-hero" style="padding-top:38px;">
+            <div class="th-toprow">
+              <div>
+                <div class="th-greet"><span data-zh>技師工作台</span><span data-en>Therapist Dashboard</span><span data-th>แดชบอร์ดนักนวด</span></div>
+                <div class="th-name">Nana · 娜娜 🛎️</div>
+                <div class="th-status-badge"><span data-zh>接單中</span><span data-en>Online</span><span data-th>ออนไลน์</span></div>
+              </div>
+              <div class="th-notif">🔔<div class="th-ndot"></div></div>
+            </div>
+            <div class="th-stats">
+              <div class="th-stat"><div class="v">₭450,000</div><div class="l"><span data-zh>今日收入</span><span data-en>Today</span></div></div>
+              <div class="th-stat"><div class="v">3</div><div class="l"><span data-zh>今日訂單</span><span data-en>Orders</span></div></div>
+              <div class="th-stat"><div class="v">₭22,500</div><div class="l"><span data-zh>待繳費</span><span data-en>Due Fee</span></div></div>
+            </div>
+          </div>
+
+          <!-- Toggle Card -->
+          <div class="th-toggle-card">
+            <div class="th-toggle-info">
+              <div class="l"><span data-zh>接單開關</span><span data-en>Availability</span><span data-th>รับงาน</span></div>
+              <div class="s">🟢 <span data-zh>接單中 · 距您 2.3km</span><span data-en>Online · 2.3km radius</span><span data-th>ออนไลน์ · รัศมี 2.3km</span></div>
+            </div>
+            <div class="toggle-sw"><div class="toggle-knob"></div></div>
+          </div>
+
+          <!-- Fee Alert -->
+          <div class="fee-alert-card">
+            <div class="fac-title">⚠️ <span data-zh>待繳平台手續費</span><span data-en>Platform Fee Due</span><span data-th>ค้างชำระค่าธรรมเนียม</span></div>
+            <div class="fac-body">
+              <span data-zh>訂單 #VTE20260617003 完成<br>收現金 ₭150,000 · 手續費(15%) <strong>₭22,500</strong><br>⛔ 繳費後才可接下一單</span>
+              <span data-en>Order #VTE20260617003 done.<br>Cash received: ₭150,000 · Fee (15%) <strong>₭22,500</strong><br>⛔ Submit fee to accept next order</span>
+              <span data-th>คำสั่ง #VTE20260617003 เสร็จ<br>รับเงินสด ₭150,000 · ค่าธรรมเนียม(15%) <strong>₭22,500</strong></span>
+            </div>
+            <button class="fac-btn"><span data-zh>立即繳交手續費 →</span><span data-en>Submit Fee Now →</span><span data-th>ชำระค่าธรรมเนียม →</span></button>
+          </div>
+
+          <!-- Orders Section -->
+          <div class="uh-section" style="padding-top:14px;">
+            <div class="section-title"><span data-zh>今日訂單</span><span data-en>Today's Orders</span><span data-th>คำสั่งวันนี้</span></div>
+
+            <div class="order-card">
+              <div class="oc-top">
+                <div class="oc-chip new"><span data-zh>新訂單</span><span data-en>NEW</span></div>
+                <span style="font-size:11px;color:#999;">14:30</span>
+              </div>
+              <div class="oc-title"><span data-zh>全身按摩 · 60分鐘</span><span data-en>Full Body · 60min</span></div>
+              <div class="oc-meta">
+                📍 Tha Deua Rd, 3F &nbsp;·&nbsp; 👤 <span data-zh>王先生</span><span data-en>Mr. Wang</span>
+              </div>
+              <div class="oc-bottom">
+                <div class="oc-fee-info">
+                  <span data-zh>收現 <b>₭150,000</b> · 手續費 ₭22,500</span>
+                  <span data-en>Cash <b>₭150,000</b> · Fee ₭22,500</span>
+                </div>
+                <div class="oc-actions">
+                  <button class="oc-btn-o"><span data-zh>拒絕</span><span data-en>Decline</span></button>
+                  <button class="oc-btn-f"><span data-zh>接受</span><span data-en>Accept</span></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="order-card">
+              <div class="oc-top">
+                <div class="oc-chip progress"><span data-zh>進行中</span><span data-en>IN SERVICE</span></div>
+                <span style="font-size:11px;color:#999;">13:00</span>
+              </div>
+              <div class="oc-title"><span data-zh>泰式按摩 · 60分鐘</span><span data-en>Thai Massage · 60min</span></div>
+              <div class="oc-meta">📍 Ban Dong Rd, 4B</div>
+              <div class="oc-bottom">
+                <div class="oc-fee-info"><span data-zh>進行中 · 預計 13:30 完成</span><span data-en>In progress · ETA 13:30</span></div>
+                <div class="oc-actions">
+                  <button class="oc-btn-f"><span data-zh>完成服務</span><span data-en>Complete</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:20px;"></div>
+        </div><!-- /thome -->
+        <div class="bnav">
+          <a class="on"><div class="ico">🏠</div><span data-zh>首頁</span></a>
+          <a><div class="ico">📋</div><span data-zh>訂單</span></a>
+          <a><div class="ico">💰</div><span data-zh>收益</span></a>
+          <a><div class="ico">💬</div><span data-zh>消息</span></a>
+          <a><div class="ico">👤</div><span data-zh>我的</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /t4 -->
+
+<!-- ████████████████████████████████████████
+  TAB 5: FEE PAYMENT
+████████████████████████████████████████ -->
+<div class="tab-panel" id="t5">
+  <div class="phone-col">
+    <div class="phone-label"><span data-zh>技師端 · 繳費</span><span data-en>Therapist · Fee Payment</span></div>
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="sb"><span class="t">14:12</span><span class="icons">📶 🔋</span></div>
+        <!-- Page Header -->
+        <div class="page-hdr">
+          <button class="back-btn">‹</button>
+          <div class="page-title"><span data-zh>繳交平台手續費</span><span data-en>Submit Platform Fee</span><span data-th>ชำระค่าธรรมเนียม</span></div>
+        </div>
+
+        <div class="fee" style="min-height:calc(100% - 44px);padding-bottom:90px;">
+          <!-- Warning Bar -->
+          <div class="fee-warn-bar">⚠️ <span data-zh>繳費審核通過後方可接受新訂單</span><span data-en>New orders only allowed after fee is verified</span><span data-th>ต้องรอยืนยันการชำระก่อนรับงานใหม่</span></div>
+
+          <!-- Order Info -->
+          <div class="fee-order">
+            <div class="feo-label"><span data-zh>已完成訂單</span><span data-en>COMPLETED ORDER</span></div>
+            <div class="feo-svc"><span data-zh>全身按摩 · 60分鐘</span><span data-en>Full Body Massage · 60min</span></div>
+            <div class="feo-stats">
+              <div class="feo-stat"><div class="v">₭150,000</div><div class="l"><span data-zh>服務金額</span><span data-en>Service</span></div></div>
+              <div class="feo-stat"><div class="v">15%</div><div class="l"><span data-zh>手續費率</span><span data-en>Fee Rate</span></div></div>
+              <div class="feo-stat"><div class="v">#VTE003</div><div class="l"><span data-zh>訂單號</span><span data-en>Order ID</span></div></div>
+            </div>
+          </div>
+
+          <!-- Fee Calculation -->
+          <div class="fee-calc">
+            <div class="bs-hdr"><div class="bs-hdr-bar"></div><span data-zh>費用計算</span><span data-en>Fee Calculation</span><span data-th>คำนวณค่าธรรมเนียม</span></div>
+            <div class="fee-row"><span class="k"><span data-zh>服務金額</span><span data-en>Service Amount</span></span><span class="v">₭150,000</span></div>
+            <div class="fee-row"><span class="k"><span data-zh>手續費率</span><span data-en>Fee Rate</span></span><span class="v">15%</span></div>
+            <div class="fee-row total"><span class="k"><span data-zh>應繳金額</span><span data-en>Amount Due</span><span data-th>ยอดที่ต้องชำระ</span></span><span class="v">₭22,500</span></div>
+            <div class="fee-amount-box">
+              <div class="fab-label"><span data-zh>請轉帳此金額至公司帳戶</span><span data-en>Transfer this amount to company account</span></div>
+              <div class="fab-value">₭22,500</div>
+            </div>
+          </div>
+
+          <!-- Bank Info -->
+          <div class="fee-bank">
+            <div class="bs-hdr"><div class="bs-hdr-bar" style="background:linear-gradient(180deg,#3B82F6,#60A5FA);"></div><span data-zh>公司收款帳戶</span><span data-en>Company Bank Account</span><span data-th>บัญชีธนาคารบริษัท</span></div>
+            <div class="bank-row"><span class="k"><span data-zh>銀行</span><span data-en>Bank</span></span><span class="v">BCEL · ທ.ຄ.ລ.</span></div>
+            <div class="bank-row"><span class="k"><span data-zh>帳號</span><span data-en>Account</span></span><span class="v">010-3-22501-8 <button class="copy-btn"><span data-zh>複製</span><span data-en>Copy</span></button></span></div>
+            <div class="bank-row"><span class="k"><span data-zh>戶名</span><span data-en>Name</span></span><span class="v">Vientiane Wellness Co., Ltd</span></div>
+            <div class="bank-row"><span class="k"><span data-zh>備註</span><span data-en>Ref</span></span><span class="v">#VTE003 <button class="copy-btn"><span data-zh>複製</span><span data-en>Copy</span></button></span></div>
+          </div>
+
+          <!-- Upload Proof -->
+          <div class="fee-upload">
+            <div class="bs-hdr"><div class="bs-hdr-bar" style="background:linear-gradient(180deg,#10B981,#34D399);"></div><span data-zh>上傳轉帳截圖</span><span data-en>Upload Transfer Proof</span><span data-th>อัพโหลดหลักฐานโอน</span></div>
+            <div class="upload-area">
+              <div class="ua-ico">📷</div>
+              <div class="ua-title"><span data-zh>點擊上傳截圖</span><span data-en>Tap to Upload Screenshot</span><span data-th>กดเพื่ออัพโหลด</span></div>
+              <div class="ua-sub"><span data-zh>支援 JPG / PNG · 最大 5MB</span><span data-en>JPG / PNG · Max 5MB</span></div>
+            </div>
+          </div>
+
+          <div style="height:20px;"></div>
+        </div><!-- /fee -->
+
+        <!-- Footer -->
+        <div class="fee-footer">
+          <div class="fee-warn-text">⛔ <span data-zh>提交後等待後台審核，審核通過才可接新訂單</span><span data-en>Pending admin review before next order</span></div>
+          <button class="submit-btn"><span data-zh>提交繳費憑證</span><span data-en>Submit Payment Proof</span><span data-th>ส่งหลักฐานการชำระ</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /t5 -->
+
+<!-- ████████████████████████████████████████
+  TAB 6: ADMIN DASHBOARD
+████████████████████████████████████████ -->
+<div class="tab-panel" id="t6">
+  <div class="phone-col">
+    <div class="phone-label"><span data-zh>管理後台</span><span data-en>Admin Dashboard</span></div>
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="sb" style="background:transparent;position:absolute;top:28px;left:0;right:0;z-index:5;padding:4px 16px;">
+          <span class="t" style="color:#fff;">14:12</span>
+          <span class="icons" style="color:rgba(255,255,255,0.8);">📶 🔋</span>
+        </div>
+        <div class="admin" style="min-height:100%;padding-bottom:20px;">
+          <!-- Admin Hero -->
+          <div class="admin-hero" style="padding-top:38px;">
+            <div class="admin-hdr-row">
+              <div>
+                <div class="admin-title"><span data-zh>管理後台</span><span data-en>Admin Dashboard</span></div>
+                <div class="admin-sub">Vientiane Wellness Co., Ltd</div>
+              </div>
+              <div class="admin-date-chip">Jun 17, 2026</div>
+            </div>
+            <div class="admin-stats">
+              <div class="astat"><div class="v">₭2.85M</div><div class="l"><span data-zh>今日流水</span><span data-en>Today GMV</span></div><div class="trend up">↑ 23% vs yesterday</div></div>
+              <div class="astat"><div class="v">₭427K</div><div class="l"><span data-zh>平台收入</span><span data-en>Revenue</span></div><div class="trend up">↑ 15% vs yesterday</div></div>
+              <div class="astat"><div class="v">19</div><div class="l"><span data-zh>今日訂單</span><span data-en>Orders</span></div><div class="trend up">↑ 4</div></div>
+              <div class="astat"><div class="v">11</div><div class="l"><span data-zh>在線技師</span><span data-en>Online</span></div><div class="trend up">Active</div></div>
+            </div>
+          </div>
+
+          <!-- Fee Pending -->
+          <div class="admin-section">
+            <div class="admin-sec-hdr"><span data-zh>待審核手續費</span><span data-en>Pending Fee Review</span> <span>3 <span data-zh>筆</span><span data-en>items</span></span></div>
+            <div class="fee-pending-row"><div class="fpr-info"><div class="name">Nana · 娜娜</div><div class="time">14:05 · #VTE003</div></div><div class="fpr-right"><div class="fpr-amount">₭22,500</div><div class="status-chip sc-review"><span data-zh>審核中</span><span data-en>REVIEW</span></div></div></div>
+            <div class="fee-pending-row"><div class="fpr-info"><div class="name">Khamphet</div><div class="time">13:30 · #VTE002</div></div><div class="fpr-right"><div class="fpr-amount">₭19,500</div><div class="status-chip sc-pend"><span data-zh>待上傳</span><span data-en>PENDING</span></div></div></div>
+            <div class="fee-pending-row"><div class="fpr-info"><div class="name">Souphavanh</div><div class="time">12:00 · #VTE001</div></div><div class="fpr-right"><div class="fpr-amount">₭25,500</div><div class="status-chip sc-paid"><span data-zh>已完成</span><span data-en>PAID</span></div></div></div>
+          </div>
+
+          <!-- Fee Settings -->
+          <div class="admin-section">
+            <div class="admin-sec-hdr"><span data-zh>手續費費率設定</span><span data-en>Fee Rate Settings</span> <span><span data-zh>編輯</span><span data-en>Edit</span></span></div>
+            <div class="fee-setting-row"><div class="fsr-label"><span data-zh>全身按摩</span><span data-en>Full Body</span></div><div class="fsr-val">15%</div></div>
+            <div class="fee-setting-row"><div class="fsr-label"><span data-zh>泰式按摩</span><span data-en>Thai Massage</span></div><div class="fsr-val">12%</div></div>
+            <div class="fee-setting-row"><div class="fsr-label"><span data-zh>精油按摩</span><span data-en>Aromatherapy</span></div><div class="fsr-val">13%</div></div>
+            <div class="fee-setting-row"><div class="fsr-label"><span data-zh>孕婦按摩</span><span data-en>Prenatal</span></div><div class="fsr-val">10%</div></div>
+          </div>
+
+          <!-- Partner Shops -->
+          <div class="admin-section">
+            <div class="admin-sec-hdr"><span data-zh>合作按摩店</span><span data-en>Partner Shops</span> <span><span data-zh>+ 新增</span><span data-en>+ Add</span></span></div>
+            <div class="shop-row"><div class="shop-ico">🏪</div><div class="shop-info"><div class="n">Vientiane Relax Center</div><div class="s"><span data-zh>技師 6 位 · 今日活躍 4</span><span data-en>6 therapists · 4 active</span></div></div><div class="shop-status-chip ssc-active"><span data-zh>合作中</span><span data-en>ACTIVE</span></div></div>
+            <div class="shop-row"><div class="shop-ico">🌿</div><div class="shop-info"><div class="n">Lao Wellness Spa</div><div class="s"><span data-zh>技師 4 位 · 今日活躍 3</span><span data-en>4 therapists · 3 active</span></div></div><div class="shop-status-chip ssc-active"><span data-zh>合作中</span><span data-en>ACTIVE</span></div></div>
+            <div class="shop-row"><div class="shop-ico">🏮</div><div class="shop-info"><div class="n">Mekong Therapy House</div><div class="s"><span data-zh>技師 3 位 · 審核中</span><span data-en>3 therapists · Pending</span></div></div><div class="shop-status-chip ssc-pending"><span data-zh>審核中</span><span data-en>REVIEW</span></div></div>
+          </div>
+
+          <div style="height:16px;"></div>
+        </div><!-- /admin -->
+      </div>
+    </div>
+  </div>
+</div><!-- /t6 -->
+
+</div><!-- /screens-wrap -->
+
+<script>
+// Language
+function setLang(l) {
+  document.body.className = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  var idx = {'lz':0,'le':1,'lt':2}[l];
+  document.querySelectorAll('.lang-btn')[idx].classList.add('active');
+}
+
+// Tab switching
+function sw(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab-nav button').forEach(b => b.classList.remove('active'));
+  var map = {'t1':0,'t2':1,'t3':2,'t4':3,'t5':4,'t6':5};
+  document.querySelectorAll('.tab-nav button')[map[id]].classList.add('active');
+}
+
+// Banner carousel
+var bIdx = 0;
+function gb(i) {
+  bIdx = i;
+  var el = document.getElementById('bt');
+  if (el) el.style.transform = 'translateX(-' + (i*100) + '%)';
+  document.querySelectorAll('#bd span').forEach(function(d,j){ d.classList.toggle('active', j===i); });
+}
+setInterval(function(){ gb((bIdx+1)%3); }, 3800);
+
+// Service item selection
+document.querySelectorAll('.svc-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    var section = this.parentElement;
+    section.querySelectorAll('.svc-item').forEach(function(i) {
+      i.classList.remove('sel');
+      var r = i.querySelector('.svc-radio');
+      if (r) r.classList.remove('on');
+    });
+    this.classList.add('sel');
+    var r = this.querySelector('.svc-radio');
+    if (r) r.classList.add('on');
+  });
+});
+
+// Time slot selection
+document.querySelectorAll('.tslot').forEach(function(slot) {
+  if (!slot.style.cursor || slot.style.cursor !== 'not-allowed') {
+    slot.addEventListener('click', function() {
+      var grid = this.parentElement;
+      grid.querySelectorAll('.tslot').forEach(function(s) { s.classList.remove('sel'); });
+      this.classList.add('sel');
+    });
+  }
+});
+</script>
+</body>
+</html>

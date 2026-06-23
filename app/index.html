@@ -1,0 +1,3257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FF4D1A">
+<title>舒摩到家 · RelaxHome</title>
+<style>
+/* ═══════════════════════════════════════════════════
+   RESET & VARIABLES
+═══════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  --p: #FF4D1A; --p2: #FF6B3D; --p3: #FFAA5C;
+  --p-light: #FFF0EB; --p-glow: rgba(255,77,26,0.22);
+  --bg: #F7F8FC; --card: #FFFFFF;
+  --text: #1A1A2E; --text-s: #6B7A99; --text-xs: #9AA5BE;
+  --success: #10B981; --warning: #F59E0B; --danger: #EF4444;
+  --r: 14px; --r-lg: 20px; --r-xl: 28px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --nav-h: 68px; --header-h: 56px;
+}
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
+body { font-family: -apple-system, 'PingFang TC', 'Noto Sans TC', 'Noto Sans Thai', 'Helvetica Neue', sans-serif; color: var(--text); }
+
+/* ═══════════════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════════════ */
+#app { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+
+/* Pages */
+.page { position: absolute; top: 38px; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: var(--bg); transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); will-change: transform; }
+.page.active { transform: translateX(0); }
+.page.slide-back { transform: translateX(100%); }
+
+/* Scrollable content area */
+.page-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+.page-content::-webkit-scrollbar { display: none; }
+.page-content.has-nav { padding-bottom: calc(var(--nav-h) + 8px); }
+
+/* ═══════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════ */
+.header {
+  height: var(--header-h); display: flex; align-items: center; padding: 0 16px;
+  background: #fff; border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0; position: relative; z-index: 10;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+}
+.header .back-btn {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: none;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  margin-right: 10px; flex-shrink: 0; font-size: 18px; color: var(--text);
+  transition: background 0.15s;
+}
+.header .back-btn:active { background: #eee; }
+.header .title { font-size: 16px; font-weight: 700; color: var(--text); flex: 1; }
+.header .actions { display: flex; gap: 8px; }
+.header .action-btn {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: none;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px;
+}
+
+/* ═══════════════════════════════════════════════════
+   BOTTOM NAV
+═══════════════════════════════════════════════════ */
+.bottom-nav {
+  height: var(--nav-h); display: flex; align-items: flex-start; padding-top: 8px;
+  background: #fff; border-top: 1px solid rgba(0,0,0,0.06); flex-shrink: 0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.06); position: relative; z-index: 100;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; padding: 4px 0; border: none; background: none; color: var(--text-xs);
+  font-size: 10px; font-weight: 600; transition: color 0.2s; position: relative;
+}
+.nav-item.active { color: var(--p); }
+.nav-icon { font-size: 22px; line-height: 1; }
+.nav-badge {
+  position: absolute; top: 0; right: 20%; width: 16px; height: 16px;
+  background: var(--p); color: #fff; font-size: 9px; font-weight: 800;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 2px solid #fff;
+}
+
+/* ═══════════════════════════════════════════════════
+   LANG BAR
+═══════════════════════════════════════════════════ */
+.lang-bar {
+  background: linear-gradient(135deg, #1a0800, #2d1200);
+  padding: 0 16px; display: flex; align-items: center; gap: 6px;
+  height: 38px; flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,107,61,0.15);
+  position: relative; z-index: 999;
+}
+.lang-btn {
+  padding: 4px 14px; border-radius: 20px; border: 1.5px solid rgba(255,107,61,0.35);
+  background: transparent; color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px;
+}
+.lang-btn.active {
+  background: linear-gradient(135deg, #FF4D1A, #FF6B3D); border-color: transparent;
+  color: #fff; box-shadow: 0 2px 10px rgba(255,77,26,0.4);
+}
+.lang-loc { margin-left: auto; font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 0.3px; }
+
+/* ═══════════════════════════════════════════════════
+   HERO GRADIENT HEADER
+═══════════════════════════════════════════════════ */
+.hero-header {
+  background: linear-gradient(165deg, #1A0800 0%, #C83800 35%, var(--p) 65%, var(--p2) 100%);
+  padding: 20px 18px 28px; position: relative; overflow: hidden; flex-shrink: 0;
+}
+.hero-header::before {
+  content: ''; position: absolute; top: -50px; right: -30px; width: 180px; height: 180px;
+  background: rgba(255,255,255,0.06); border-radius: 50%;
+}
+.hero-header::after {
+  content: ''; position: absolute; bottom: -40px; right: 20px; width: 120px; height: 120px;
+  background: rgba(255,255,255,0.04); border-radius: 50%;
+}
+.hero-row { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; }
+.hero-greet { font-size: 12px; color: rgba(255,255,255,0.72); margin-bottom: 3px; }
+.hero-name { font-size: 22px; font-weight: 800; color: #fff; }
+.hero-right { display: flex; align-items: center; gap: 10px; }
+.hero-loc { font-size: 11px; background: rgba(255,255,255,0.18); color: #fff; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.25); backdrop-filter: blur(10px); }
+.hero-avatar { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 20px; border: 2px solid rgba(255,255,255,0.3); }
+
+/* ═══════════════════════════════════════════════════
+   BANNER CAROUSEL
+═══════════════════════════════════════════════════ */
+.banner-wrap { background: var(--bg); padding: 16px 16px 4px; flex-shrink: 0; }
+.banner-scroll { border-radius: var(--r-xl); overflow: hidden; position: relative; height: 152px; }
+.banner-track { display: flex; height: 100%; transition: transform 0.45s cubic-bezier(0.4,0,0.2,1); }
+.banner-slide { min-width: 100%; height: 100%; position: relative; overflow: hidden; }
+.banner-slide .bs-bg { position: absolute; inset: 0; }
+.banner-slide .bs-content { position: relative; z-index: 2; padding: 18px 20px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+.banner-slide .bs-tag { font-size: 10px; font-weight: 700; background: rgba(255,255,255,0.22); backdrop-filter: blur(6px); color: #fff; padding: 4px 11px; border-radius: 20px; align-self: flex-start; border: 1px solid rgba(255,255,255,0.3); }
+.banner-slide .bs-title { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.25; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.banner-slide .bs-sub { font-size: 12px; color: rgba(255,255,255,0.88); margin-top: 3px; }
+.banner-slide .bs-action-btn { align-self: flex-start; background: rgba(255,255,255,0.95); font-size: 12px; font-weight: 800; padding: 7px 18px; border-radius: 20px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.banner-deco { position: absolute; right: -10px; top: 50%; transform: translateY(-50%); font-size: 80px; opacity: 0.15; pointer-events: none; }
+.banner-dots { display: flex; justify-content: center; gap: 5px; padding: 10px 0 4px; }
+.banner-dots span { width: 6px; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.15); transition: all 0.3s; cursor: pointer; }
+.banner-dots span.on { width: 18px; background: var(--p); }
+
+/* ═══════════════════════════════════════════════════
+   SECTION TITLES
+═══════════════════════════════════════════════════ */
+.section-title { display: flex; justify-content: space-between; align-items: center; padding: 18px 16px 12px; }
+.section-title h3 { font-size: 16px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 7px; }
+.section-title h3::before { content: ''; width: 4px; height: 16px; background: linear-gradient(180deg, var(--p), var(--p3)); border-radius: 2px; display: inline-block; }
+.section-title a { font-size: 12px; color: var(--p); font-weight: 600; cursor: pointer; }
+
+/* ═══════════════════════════════════════════════════
+   CATEGORY GRID
+═══════════════════════════════════════════════════ */
+.cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 16px 8px; }
+.cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+.cat-item:active { opacity: 0.7; }
+.cat-icon { width: 58px; height: 58px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: transform 0.15s; }
+.cat-item:active .cat-icon { transform: scale(0.94); }
+.cat-label { font-size: 11px; font-weight: 600; color: var(--text-s); text-align: center; line-height: 1.3; }
+.c1 { background: linear-gradient(135deg, #FFE8DF, #FFD4C4); }
+.c2 { background: linear-gradient(135deg, #E0F0FF, #C8E4FF); }
+.c3 { background: linear-gradient(135deg, #E0FFF0, #C8FFE0); }
+.c4 { background: linear-gradient(135deg, #FFF8E0, #FFEDC0); }
+.c5 { background: linear-gradient(135deg, #F0E0FF, #E0C8FF); }
+.c6 { background: linear-gradient(135deg, #FFE0EC, #FFD0E0); }
+.c7 { background: linear-gradient(135deg, #E0F8F0, #C8F5E0); }
+.c8 { background: linear-gradient(135deg, #FFF0E0, #FFE0C0); }
+
+/* ═══════════════════════════════════════════════════
+   THERAPIST CARDS
+═══════════════════════════════════════════════════ */
+.therapist-list { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+.therapist-card { background: var(--card); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+.therapist-card:active { transform: scale(0.98); box-shadow: var(--shadow-lg); }
+.tc-img { height: 160px; position: relative; display: flex; align-items: center; justify-content: center; font-size: 64px; background: linear-gradient(135deg, #f5e8d8, #ead5c0); overflow: hidden; }
+.tc-selected { position: absolute; top: 12px; left: 12px; background: linear-gradient(135deg, var(--p), var(--p2)); color: #fff; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px; box-shadow: 0 3px 10px var(--p-glow); }
+.tc-avail { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.45); backdrop-filter: blur(10px); color: #fff; font-size: 10px; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 5px; }
+.tc-avail .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 6px rgba(16,185,129,0.6); animation: pulse-dot 2s infinite; }
+@keyframes pulse-dot { 0%,100%{transform:scale(1);} 50%{transform:scale(1.3);} }
+.tc-body { padding: 14px 16px; }
+.tc-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.tc-name { font-size: 17px; font-weight: 800; color: var(--text); }
+.tc-price { font-size: 17px; font-weight: 800; color: var(--p); }
+.tc-rating { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+.tc-stars { color: #FFBB00; font-size: 13px; letter-spacing: -1px; }
+.tc-rating-num { font-size: 13px; font-weight: 700; color: var(--text-s); }
+.tc-dist { font-size: 11px; color: var(--text-xs); margin-left: auto; }
+.tc-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.tc-tag { background: var(--p-light); color: var(--p); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,77,26,0.12); }
+.tc-actions { display: flex; gap: 10px; margin-top: 14px; }
+.tc-btn-outline { flex: 1; height: 40px; border: 1.5px solid var(--p); border-radius: var(--r); background: #fff; color: var(--p); font-size: 13px; font-weight: 700; cursor: pointer; }
+.tc-btn-fill { flex: 1.6; height: 40px; background: linear-gradient(135deg, var(--p), var(--p2)); border: none; border-radius: var(--r); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px var(--p-glow); }
+
+/* ═══════════════════════════════════════════════════
+   BOOKING PAGE
+═══════════════════════════════════════════════════ */
+.book-therapist-hero {
+  background: linear-gradient(165deg, #1A0800 0%, #C83800 40%, var(--p2) 100%);
+  padding: 20px 18px; display: flex; align-items: center; gap: 16px; flex-shrink: 0;
+}
+.bth-avatar { width: 68px; height: 68px; border-radius: 20px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); flex-shrink: 0; }
+.bth-name { font-size: 20px; font-weight: 800; color: #fff; }
+.bth-rating { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 13px; color: rgba(255,255,255,0.8); }
+.bth-tags { display: flex; gap: 6px; margin-top: 8px; }
+.bth-tag { background: rgba(255,255,255,0.18); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+
+.book-section { background: #fff; margin: 0 0 10px; padding: 16px; }
+.book-section-title { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+.book-section-title::before { content: ''; width: 3.5px; height: 14px; background: linear-gradient(180deg, var(--p), var(--p3)); border-radius: 2px; display: inline-block; }
+
+.service-item {
+  border: 2px solid #f0f0f0; border-radius: var(--r); padding: 14px; display: flex;
+  align-items: center; gap: 12px; cursor: pointer; margin-bottom: 10px; transition: all 0.2s;
+}
+.service-item:last-child { margin-bottom: 0; }
+.service-item.selected { border-color: var(--p); background: linear-gradient(135deg, #FFF8F6, var(--p-light)); }
+.si-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.si-info { flex: 1; }
+.si-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.si-desc { font-size: 11px; color: var(--text-s); margin-top: 3px; }
+.si-price { font-size: 16px; font-weight: 800; color: var(--p); flex-shrink: 0; }
+.si-radio { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid #e0e0e0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+.service-item.selected .si-radio { background: linear-gradient(135deg, var(--p), var(--p2)); border-color: transparent; }
+.service-item.selected .si-radio::after { content: '✓'; font-size: 11px; color: #fff; font-weight: 900; }
+
+.time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.time-slot { border: 1.5px solid #e8e8e8; border-radius: var(--r); padding: 12px 8px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-s); transition: all 0.2s; background: #fff; }
+.time-slot.selected { border-color: var(--p); background: linear-gradient(135deg, var(--p), var(--p2)); color: #fff; box-shadow: 0 4px 12px var(--p-glow); }
+.time-slot.full { background: #f8f8f8; color: #ccc; cursor: not-allowed; border-color: transparent; font-size: 11px; }
+
+.addr-input { display: flex; align-items: center; gap: 12px; background: var(--bg); border-radius: var(--r); padding: 14px; border: 1.5px solid #e8e8e8; cursor: pointer; }
+.addr-input:active { border-color: var(--p); }
+.addr-input span { font-size: 13px; color: var(--text-s); flex: 1; }
+
+.cash-notice { background: linear-gradient(135deg, #FFF9E6, #FFF0C8); border: 1.5px solid #FFD666; border-radius: var(--r); padding: 14px 16px; }
+.cash-notice .cn-head { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #D48806; margin-bottom: 8px; }
+.cash-notice p { font-size: 12px; color: #8A6300; line-height: 1.75; }
+.cash-notice b { color: #D48806; }
+
+/* ═══════════════════════════════════════════════════
+   STICKY BOOKING FOOTER
+═══════════════════════════════════════════════════ */
+.book-footer {
+  background: #fff; padding: 14px 16px; border-top: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0; box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+}
+.book-footer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.bf-label { font-size: 12px; color: var(--text-s); }
+.bf-total { font-size: 24px; font-weight: 900; color: var(--p); }
+.book-confirm-btn { width: 100%; height: 50px; background: linear-gradient(135deg, var(--p), var(--p2)); border: none; border-radius: var(--r-lg); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 22px var(--p-glow); letter-spacing: 0.5px; transition: transform 0.15s; }
+.book-confirm-btn:active { transform: scale(0.98); }
+
+/* ═══════════════════════════════════════════════════
+   ORDER TRACKING
+═══════════════════════════════════════════════════ */
+.order-hero {
+  background: linear-gradient(165deg, #1A0800 0%, #C83800 40%, var(--p2) 100%);
+  padding: 20px 18px 40px; flex-shrink: 0;
+}
+.oh-status-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.oh-label { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+.oh-status { font-size: 24px; font-weight: 800; color: #fff; }
+.oh-time { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 6px; }
+.oh-id { font-size: 11px; background: rgba(255,255,255,0.18); color: #fff; padding: 4px 12px; border-radius: 20px; }
+
+.therapist-float-card {
+  background: #fff; margin: -20px 16px 0; border-radius: var(--r-xl); padding: 16px;
+  box-shadow: var(--shadow-lg); position: relative; z-index: 2; flex-shrink: 0;
+}
+.tfc-row { display: flex; align-items: center; gap: 12px; }
+.tfc-avatar { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #f5e8d8, #ead5c0); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.tfc-name { font-size: 16px; font-weight: 800; color: var(--text); }
+.tfc-eta { font-size: 12px; color: var(--success); font-weight: 700; margin-top: 3px; }
+.tfc-btns { margin-left: auto; display: flex; gap: 8px; }
+.tfc-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); border: 1.5px solid #eee; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
+
+.progress-card { background: #fff; margin: 12px 16px; border-radius: var(--r-lg); padding: 18px 16px; box-shadow: var(--shadow); }
+.progress-card h4 { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 7px; }
+.progress-card h4::before { content: ''; width: 3.5px; height: 14px; background: linear-gradient(180deg, var(--p), var(--p3)); border-radius: 2px; display: inline-block; }
+.step-row { display: flex; gap: 12px; }
+.step-icon-col { display: flex; flex-direction: column; align-items: center; width: 32px; flex-shrink: 0; }
+.step-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; }
+.step-icon.done { background: linear-gradient(135deg, var(--success), #34D399); color: #fff; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+.step-icon.active { background: linear-gradient(135deg, var(--p), var(--p2)); color: #fff; box-shadow: 0 4px 12px var(--p-glow); animation: pulse-step 2s infinite; }
+.step-icon.pending { background: #f0f0f0; color: #ccc; }
+@keyframes pulse-step { 0%,100%{ box-shadow: 0 4px 12px var(--p-glow); } 50%{ box-shadow: 0 4px 20px rgba(255,77,26,0.45); } }
+.step-line { flex: 1; width: 2px; background: #f0f0f0; margin: 4px auto; border-radius: 2px; min-height: 18px; }
+.step-line.done { background: linear-gradient(180deg, var(--success), #34D399); }
+.step-content { flex: 1; padding-bottom: 20px; }
+.step-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1; }
+.step-time { font-size: 11px; color: var(--text-xs); margin-top: 5px; }
+.step-desc { font-size: 12px; color: var(--text-s); margin-top: 5px; line-height: 1.5; }
+
+.cash-reminder-card { background: linear-gradient(135deg, #FFF9E6, #FFF0C8); border: 1.5px solid #FFD666; margin: 0 16px 14px; border-radius: var(--r-lg); padding: 16px; }
+.crc-head { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; color: #D48806; margin-bottom: 8px; }
+.crc-amount { font-size: 28px; font-weight: 900; color: var(--p); }
+.crc-label { font-size: 12px; color: #8A6300; margin-top: 4px; }
+
+/* ═══════════════════════════════════════════════════
+   THERAPIST HOME
+═══════════════════════════════════════════════════ */
+.therapist-hero {
+  background: linear-gradient(165deg, #0D1B2A 0%, #1A3A5C 50%, #2D5F8A 100%);
+  padding: 20px 18px 30px; position: relative; overflow: hidden; flex-shrink: 0;
+}
+.therapist-hero::before { content: ''; position: absolute; top: -40px; right: -20px; width: 160px; height: 160px; background: rgba(255,255,255,0.04); border-radius: 50%; }
+.th-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; position: relative; z-index: 1; }
+.th-notif { width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid rgba(255,255,255,0.1); position: relative; cursor: pointer; }
+.th-notif-dot { position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; background: var(--p); border-radius: 50%; border: 2px solid #1A3A5C; }
+.th-stats { display: flex; gap: 10px; position: relative; z-index: 1; }
+.th-stat { flex: 1; background: rgba(255,255,255,0.09); backdrop-filter: blur(12px); border-radius: var(--r-lg); padding: 14px 12px; border: 1px solid rgba(255,255,255,0.07); }
+.th-stat .val { font-size: 20px; font-weight: 900; color: #fff; }
+.th-stat .lbl { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 4px; font-weight: 600; }
+
+.toggle-card { background: #fff; margin: -14px 16px 0; border-radius: var(--r-xl); padding: 16px 18px; box-shadow: var(--shadow-lg); display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; }
+.toggle-info .label { font-size: 16px; font-weight: 800; color: var(--text); }
+.toggle-info .sub { font-size: 12px; font-weight: 700; margin-top: 3px; }
+.sub.on { color: var(--success); }
+.sub.off { color: var(--text-xs); }
+.toggle-sw { width: 54px; height: 32px; border-radius: 16px; position: relative; cursor: pointer; transition: background 0.3s; }
+.toggle-sw.on { background: linear-gradient(135deg, var(--success), #34D399); box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
+.toggle-sw.off { background: #e0e0e0; }
+.toggle-knob { position: absolute; top: 3px; width: 26px; height: 26px; background: #fff; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: left 0.3s; }
+.toggle-sw.on .toggle-knob { left: 25px; }
+.toggle-sw.off .toggle-knob { left: 3px; }
+
+.fee-alert { background: linear-gradient(135deg, #FFF3E0, #FFE8C0); border: 1.5px solid #FFB74D; border-radius: var(--r-lg); margin: 14px 16px 0; padding: 16px; }
+.fa-head { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: #E65100; margin-bottom: 8px; }
+.fa-p { font-size: 12px; color: #8A4B00; line-height: 1.6; }
+.fa-btn { width: 100%; height: 40px; background: linear-gradient(135deg, var(--p), var(--p2)); border: none; border-radius: var(--r); color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 12px; box-shadow: 0 4px 14px var(--p-glow); }
+
+.order-card { background: #fff; border-radius: var(--r-lg); padding: 16px; box-shadow: var(--shadow); }
+.oc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.oc-chip { font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; }
+.oc-chip.new { background: #FFF0EB; color: var(--p); }
+.oc-chip.inprog { background: #EEF9F0; color: var(--success); }
+.oc-service { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.oc-detail { font-size: 12px; color: var(--text-s); display: flex; flex-direction: column; gap: 3px; }
+.oc-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 14px; border-top: 1.5px dashed #eee; }
+.oc-fee { font-size: 12px; color: var(--text-s); }
+.oc-fee strong { color: var(--p); font-size: 15px; }
+.oc-btns { display: flex; gap: 8px; }
+.btn-outline-sm { border: 1.5px solid var(--p); background: #fff; color: var(--p); font-size: 12px; font-weight: 700; padding: 8px 14px; border-radius: 10px; cursor: pointer; }
+.btn-fill-sm { background: linear-gradient(135deg, var(--p), var(--p2)); color: #fff; border: none; font-size: 12px; font-weight: 700; padding: 8px 14px; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 12px var(--p-glow); }
+
+/* ═══════════════════════════════════════════════════
+   FEE PAYMENT
+═══════════════════════════════════════════════════ */
+.fee-warning-bar { background: linear-gradient(135deg, #FFF3E0, #FFE8C0); padding: 12px 16px; font-size: 12px; color: #E65100; font-weight: 600; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #FFD580; flex-shrink: 0; }
+
+.fee-card { background: #fff; margin: 12px 16px 0; border-radius: var(--r-lg); padding: 18px 16px; box-shadow: var(--shadow); }
+.fee-card-title { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+.fee-card-title.orange::before { content: ''; width: 3.5px; height: 14px; background: linear-gradient(180deg, var(--p), var(--p3)); border-radius: 2px; display: inline-block; }
+.fee-card-title.blue::before { content: ''; width: 3.5px; height: 14px; background: linear-gradient(180deg, #3B82F6, #60A5FA); border-radius: 2px; display: inline-block; }
+.fee-card-title.green::before { content: ''; width: 3.5px; height: 14px; background: linear-gradient(180deg, var(--success), #34D399); border-radius: 2px; display: inline-block; }
+
+.fee-summary { display: flex; justify-content: space-around; padding: 8px 0 14px; border-bottom: 1px solid #f5f5f5; margin-bottom: 14px; }
+.fs-item { text-align: center; }
+.fs-item .v { font-size: 15px; font-weight: 800; color: var(--text); }
+.fs-item .l { font-size: 11px; color: var(--text-xs); margin-top: 3px; }
+
+.fee-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; }
+.fee-row:not(:last-child) { border-bottom: 1px solid #f5f5f5; }
+.fee-row .k { font-size: 13px; color: var(--text-s); }
+.fee-row .v { font-size: 13px; font-weight: 700; color: var(--text); }
+.fee-row.total .k { font-size: 15px; font-weight: 800; color: var(--text); }
+.fee-row.total .v { font-size: 24px; font-weight: 900; color: var(--p); }
+.fee-highlight { background: linear-gradient(135deg, #FFF8F6, var(--p-light)); border: 1.5px solid rgba(255,77,26,0.2); border-radius: var(--r); padding: 16px; text-align: center; margin-top: 12px; }
+.fh-amount { font-size: 36px; font-weight: 900; color: var(--p); }
+.fh-label { font-size: 12px; color: var(--text-s); margin-top: 4px; }
+
+.bank-info { background: var(--bg); border-radius: var(--r); padding: 14px; }
+.bi-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; }
+.bi-row:not(:last-child) { border-bottom: 1px solid rgba(0,0,0,0.05); }
+.bi-k { font-size: 12px; color: var(--text-xs); }
+.bi-v { font-size: 14px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.copy-btn { font-size: 10px; background: #fff; border: 1px solid #e0e0e0; padding: 4px 10px; border-radius: 8px; cursor: pointer; color: var(--text-s); font-weight: 600; }
+.copy-btn:active { background: var(--p); color: #fff; border-color: var(--p); }
+
+.upload-box { border: 2px dashed #FFCAB0; border-radius: var(--r-lg); padding: 30px 20px; text-align: center; background: #FFFAF8; cursor: pointer; }
+.upload-box .ub-icon { font-size: 36px; margin-bottom: 10px; }
+.upload-box .ub-text { font-size: 14px; font-weight: 600; color: var(--text-s); }
+.upload-box .ub-sub { font-size: 11px; color: var(--text-xs); margin-top: 5px; }
+.uploaded-preview { background: var(--bg); border-radius: var(--r); padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+.up-icon { font-size: 28px; }
+.up-info .name { font-size: 13px; font-weight: 700; color: var(--text); }
+.up-info .size { font-size: 11px; color: var(--text-xs); margin-top: 2px; }
+.up-del { margin-left: auto; color: var(--danger); font-size: 18px; cursor: pointer; }
+
+.fee-page-footer { background: #fff; padding: 14px 16px 20px; border-top: 1px solid rgba(0,0,0,0.06); flex-shrink: 0; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); }
+.warning-text { font-size: 11px; color: var(--danger); text-align: center; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.submit-btn { width: 100%; height: 50px; background: linear-gradient(135deg, var(--p), var(--p2)); border: none; border-radius: var(--r-lg); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 22px var(--p-glow); transition: transform 0.15s; }
+.submit-btn:active { transform: scale(0.98); }
+
+/* ═══════════════════════════════════════════════════
+   ADMIN
+═══════════════════════════════════════════════════ */
+.admin-hero {
+  background: linear-gradient(165deg, #0D1B2A 0%, #1A3A5C 50%, #2D5F8A 100%);
+  padding: 20px 18px 28px; flex-shrink: 0;
+}
+.admin-hero h2 { font-size: 20px; font-weight: 900; color: #fff; }
+.admin-hero p { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+.admin-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; }
+.as-card { background: #fff; border-radius: var(--r-lg); padding: 16px; box-shadow: var(--shadow); }
+.as-card .val { font-size: 24px; font-weight: 900; color: var(--text); }
+.as-card .lbl { font-size: 11px; color: var(--text-xs); margin-top: 4px; }
+.as-card .trend { font-size: 12px; font-weight: 700; margin-top: 8px; }
+.trend-up { color: var(--success); }
+.trend-down { color: var(--danger); }
+
+.admin-section { background: #fff; margin: 0 16px 12px; border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow); }
+.admin-section-head { padding: 14px 16px; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; align-items: center; }
+.admin-section-head h4 { font-size: 14px; font-weight: 800; color: var(--text); }
+.admin-section-head .more { font-size: 12px; color: var(--p); font-weight: 600; cursor: pointer; }
+
+.review-item { padding: 14px 16px; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; align-items: center; }
+.review-item:last-child { border-bottom: none; }
+.ri-info .name { font-size: 14px; font-weight: 700; color: var(--text); }
+.ri-info .sub { font-size: 11px; color: var(--text-xs); margin-top: 3px; }
+.ri-right { text-align: right; }
+.ri-amount { font-size: 15px; font-weight: 800; color: var(--p); }
+.ri-chip { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-top: 5px; display: inline-block; }
+.chip-pending { background: #FFF3E0; color: #E65100; }
+.chip-review { background: #EBF5FF; color: #1890FF; }
+.chip-paid { background: #F0FFF4; color: var(--success); }
+
+.rate-item { padding: 14px 16px; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; align-items: center; }
+.rate-item:last-child { border-bottom: none; }
+.ri-label { font-size: 13px; color: var(--text-s); font-weight: 500; }
+.ri-rate { font-size: 15px; font-weight: 800; color: var(--p); background: var(--p-light); padding: 4px 14px; border-radius: 20px; }
+
+.shop-item { padding: 12px 16px; border-bottom: 1px solid #f5f5f5; display: flex; align-items: center; gap: 12px; }
+.shop-item:last-child { border-bottom: none; }
+.shop-icon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #FFE8DF, #FFD4C4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.shop-info .sname { font-size: 14px; font-weight: 700; color: var(--text); }
+.shop-info .ssub { font-size: 11px; color: var(--text-xs); margin-top: 3px; }
+.shop-chip { margin-left: auto; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+.chip-active { background: #F0FFF4; color: var(--success); }
+.chip-pending-s { background: #FFF3E0; color: #E65100; }
+
+/* ═══════════════════════════════════════════════════
+   PROFILE PAGE
+═══════════════════════════════════════════════════ */
+.profile-hero {
+  background: linear-gradient(165deg, #1A0800 0%, #C83800 40%, var(--p2) 100%);
+  padding: 28px 18px 32px; display: flex; flex-direction: column; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 38px; border: 3px solid rgba(255,255,255,0.4); }
+.profile-name { font-size: 22px; font-weight: 800; color: #fff; }
+.profile-sub { font-size: 12px; color: rgba(255,255,255,0.7); }
+.profile-stats { display: flex; gap: 28px; margin-top: 4px; }
+.ps-item { text-align: center; }
+.ps-item .v { font-size: 18px; font-weight: 800; color: #fff; }
+.ps-item .l { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+.mode-card { background: #fff; margin: 16px 16px 0; border-radius: var(--r-lg); padding: 6px; box-shadow: var(--shadow); display: flex; }
+.mode-btn { flex: 1; padding: 10px; text-align: center; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--text-s); transition: all 0.25s; border: none; background: none; }
+.mode-btn.active { background: linear-gradient(135deg, var(--p), var(--p2)); color: #fff; box-shadow: 0 4px 12px var(--p-glow); }
+
+.menu-section { background: #fff; margin: 12px 16px 0; border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow); }
+.menu-item { display: flex; align-items: center; gap: 14px; padding: 16px; border-bottom: 1px solid #f5f5f5; cursor: pointer; transition: background 0.15s; }
+.menu-item:last-child { border-bottom: none; }
+.menu-item:active { background: var(--bg); }
+.menu-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.menu-label { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+.menu-arrow { font-size: 16px; color: var(--text-xs); }
+
+/* ═══════════════════════════════════════════════════
+   ORDER LIST PAGE
+═══════════════════════════════════════════════════ */
+.filter-tabs { display: flex; background: #fff; border-bottom: 1px solid rgba(0,0,0,0.05); padding: 0 16px; gap: 0; }
+.filter-tab { padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--text-xs); border: none; background: none; cursor: pointer; border-bottom: 2.5px solid transparent; white-space: nowrap; transition: all 0.2s; }
+.filter-tab.active { color: var(--p); border-bottom-color: var(--p); }
+
+.order-list-item { background: #fff; margin: 10px 16px 0; border-radius: var(--r-lg); padding: 16px; box-shadow: var(--shadow); cursor: pointer; }
+.order-list-item:active { opacity: 0.9; }
+.oli-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.oli-id { font-size: 12px; color: var(--text-xs); }
+.oli-chip { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+.chip-ongoing { background: var(--p-light); color: var(--p); }
+.chip-done { background: #F0FFF4; color: var(--success); }
+.oli-service { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 5px; }
+.oli-therapist { font-size: 12px; color: var(--text-s); }
+.oli-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f5f5f5; }
+.oli-price { font-size: 18px; font-weight: 900; color: var(--p); }
+.oli-date { font-size: 11px; color: var(--text-xs); }
+
+/* ═══════════════════════════════════════════════════
+   THERAPIST PROFILE PAGE
+═══════════════════════════════════════════════════ */
+.tp-hero-curve {
+  background: linear-gradient(180deg, #0D1B2A 0%, #1A3A5C 40%, var(--bg) 100%);
+  padding: 24px 20px 40px; text-align: center; flex-shrink: 0;
+  position: relative; overflow: hidden;
+}
+.tp-hero-curve::before {
+  content: ''; position: absolute; top: -60px; right: -40px; width: 200px; height: 200px;
+  background: rgba(255,255,255,0.03); border-radius: 50%;
+}
+.tp-avatar-wrap {
+  width: 88px; height: 88px; margin: 0 auto 12px; position: relative; z-index: 1;
+}
+.tp-avatar {
+  width: 88px; height: 88px; border-radius: 50%; background: linear-gradient(135deg, #4A90D9, #7BB3F0);
+  display: flex; align-items: center; justify-content: center; font-size: 46px;
+  border: 3px solid rgba(255,255,255,0.25); box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+  position: relative; z-index: 1;
+}
+.tp-badge {
+  position: absolute; bottom: 2px; right: 2px; width: 26px; height: 26px;
+  background: var(--success); border-radius: 50%; border: 2px solid #1A3A5C;
+  display: flex; align-items: center; justify-content: center; font-size: 13px; z-index: 2;
+}
+.tp-name { font-size: 22px; font-weight: 900; color: #fff; position: relative; z-index: 1; }
+.tp-role-tag {
+  display: inline-block; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 20px; padding: 3px 14px; font-size: 11px; color: rgba(255,255,255,0.75);
+  margin-top: 6px; position: relative; z-index: 1; font-weight: 600;
+}
+.tp-rating-row {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 8px; position: relative; z-index: 1;
+}
+.tp-stars { color: #FFBB00; font-size: 16px; letter-spacing: -1px; }
+.tp-rating-val { font-size: 14px; font-weight: 800; color: #fff; }
+.tp-review-count { font-size: 11px; color: rgba(255,255,255,0.5); }
+
+.tp-stats-row {
+  display: flex; justify-content: center; gap: 8px; margin-top: 18px;
+  position: relative; z-index: 1;
+}
+.tp-stat-item {
+  background: rgba(255,255,255,0.08); backdrop-filter: blur(6px);
+  border-radius: var(--r); padding: 10px 16px; text-align: center;
+  border: 1px solid rgba(255,255,255,0.08); min-width: 80px;
+}
+.tp-stat-item .v { font-size: 18px; font-weight: 900; color: #fff; }
+.tp-stat-item .l { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 3px; font-weight: 600; }
+
+.tp-content { padding: 0 16px 100px; margin-top: -12px; position: relative; z-index: 2; }
+
+.tp-section {
+  background: var(--card); border-radius: var(--r-lg); padding: 16px 18px;
+  margin-bottom: 12px; box-shadow: var(--shadow);
+}
+.tp-section-title {
+  font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.tp-section-title::before {
+  content: ''; width: 3.5px; height: 15px; background: linear-gradient(180deg, #4A90D9, #7BB3F0);
+  border-radius: 2px; display: inline-block;
+}
+
+.tp-svc-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+.tp-svc-item:not(:last-child) { border-bottom: 1px solid #f5f5f5; }
+.tp-svc-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.tp-svc-dur { font-size: 11px; color: var(--text-xs); margin-top: 2px; }
+.tp-svc-price { font-size: 16px; font-weight: 900; color: var(--p); }
+
+.tp-about-text { font-size: 13px; color: var(--text-s); line-height: 1.7; }
+
+.tp-schedule-list { display: flex; flex-direction: column; gap: 8px; }
+.tp-sch-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.tp-sch-day { font-weight: 700; color: var(--text); }
+.tp-sch-time { color: var(--text-s); font-weight: 600; }
+.tp-sch-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+
+.tp-shop-card {
+  background: var(--bg); border-radius: var(--r); padding: 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.tp-shop-icon {
+  width: 44px; height: 44px; border-radius: var(--r); background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+}
+.tp-shop-info .n { font-size: 14px; font-weight: 800; color: var(--text); }
+.tp-shop-info .s { font-size: 11px; color: var(--text-xs); margin-top: 2px; }
+
+.tp-cert-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tp-cert-tag {
+  background: #EEF5FF; color: #2D5F8A; font-size: 11px; font-weight: 700;
+  padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(45,95,138,0.12);
+  display: flex; align-items: center; gap: 5px;
+}
+
+.tp-edit-btn {
+  display: block; width: calc(100% - 32px); margin: 8px 16px 24px;
+  height: 48px; background: linear-gradient(135deg, #4A90D9, #3B7FCC);
+  border: none; border-radius: var(--r-lg); color: #fff; font-size: 15px;
+  font-weight: 800; cursor: pointer; box-shadow: 0 6px 20px rgba(74,144,217,0.35);
+  transition: transform 0.15s;
+}
+.tp-edit-btn:active { transform: scale(0.97); }
+
+/* ═══════════════════════════════════════════════════
+   TOAST NOTIFICATION
+═══════════════════════════════════════════════════ */
+#toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(30,30,40,0.92); color: #fff; padding: 10px 22px; border-radius: 25px; font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 9999; pointer-events: none; white-space: nowrap; backdrop-filter: blur(10px); }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ═══════════════════════════════════════════════════
+   UTILITY
+═══════════════════════════════════════════════════ */
+.divider { height: 10px; background: var(--bg); flex-shrink: 0; }
+.space-4 { height: 4px; }
+.space-8 { height: 8px; }
+.space-16 { height: 16px; }
+.text-center { text-align: center; }
+.px-16 { padding-left: 16px; padding-right: 16px; }
+.mt-12 { margin-top: 12px; }
+.w-full { width: 100%; }
+
+/* Small chips / labels */
+.label-sm { font-size: 11px; font-weight: 600; color: var(--text-xs); }
+
+/* Rating stars */
+.stars { color: #FFBB00; font-size: 14px; letter-spacing: -1px; }
+
+/* Separator line */
+hr.light { border: none; border-top: 1px solid #f0f0f0; margin: 0 16px; }
+
+/* Empty state */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; }
+.empty-state .icon { font-size: 56px; margin-bottom: 14px; }
+.empty-state p { font-size: 15px; color: var(--text-s); font-weight: 600; }
+.empty-state span { font-size: 13px; color: var(--text-xs); margin-top: 6px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ═══════════════════════════════════════════════
+     LANG BAR (shared across all pages via JS injection)
+════════════════════════════════════════════════ -->
+<div id="lang-bar" class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('zh')">中文</button>
+  <button class="lang-btn" onclick="setLang('en')">English</button>
+  <button class="lang-btn" onclick="setLang('th')">ภาษาไทย</button>
+  <span class="lang-loc">📍 ວຽງຈັນ · Vientiane</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SUB-PAGE STYLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.sub-header {
+  background: var(--p); color: #fff; padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 17px; font-weight: 700; flex-shrink: 0;
+}
+.sub-header .back-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: none; background: rgba(255,255,255,0.2); color: #fff;
+  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sub-page-content { flex: 1; overflow-y: auto; padding-bottom: 24px; }
+
+/* Star Rating */
+.star-row { display: flex; gap: 6px; justify-content: center; margin: 12px 0; }
+.star-row .star { font-size: 32px; cursor: pointer; color: #ddd; transition: color 0.15s; }
+.star-row .star.on { color: #F59E0B; }
+.star-row .star:hover { color: #F59E0B; }
+
+/* Coupon Cards */
+.coupon-card {
+  margin: 12px 16px; background: #fff; border-radius: 12px;
+  padding: 16px; border-left: 4px solid var(--p);
+  box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+}
+.coupon-card::after {
+  content: ''; position: absolute; right: -18px; top: 50%; transform: translateY(-50%);
+  width: 36px; height: 36px; background: var(--bg); border-radius: 50%;
+}
+.coupon-card .cp-amount { font-size: 24px; font-weight: 800; color: var(--p); }
+.coupon-card .cp-desc { font-size: 13px; color: var(--text-s); margin-top: 2px; }
+.coupon-card .cp-expire { font-size: 11px; color: var(--text-xs); margin-top: 6px; }
+.coupon-card .cp-tag {
+  position: absolute; top: 12px; right: 12px;
+  background: #FFF0EB; color: #FF6B3D; font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 10px;
+}
+.coupon-card.used { opacity: 0.5; border-left-color: #ccc; }
+.coupon-card.used .cp-amount, .coupon-card.used .cp-tag { color: #999; }
+
+/* Address */
+.addr-card {
+  margin: 10px 16px; background: #fff; border-radius: 12px;
+  padding: 14px 16px; box-shadow: var(--shadow-sm);
+  border: 1.5px solid #eee; position: relative;
+}
+.addr-card .addr-tag {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;
+}
+.addr-card .addr-tag.default { background: #FFF0EB; color: #FF6B3D; }
+.addr-card .addr-name { font-size: 15px; font-weight: 700; }
+.addr-card .addr-phone { font-size: 13px; color: var(--text-s); margin-left: 8px; }
+.addr-card .addr-text { font-size: 13px; color: var(--text-s); margin-top: 4px; line-height: 1.5; }
+.addr-card .addr-actions { display: flex; gap: 12px; margin-top: 10px; }
+.addr-card .addr-edit, .addr-card .addr-del {
+  font-size: 12px; font-weight: 600; cursor: pointer; border: none; background: none;
+}
+.addr-card .addr-edit { color: var(--p); }
+.addr-card .addr-del { color: #999; }
+.addr-new-btn {
+  width: calc(100% - 32px); margin: 12px 16px; height: 48px;
+  background: #fff; border: 1.5px dashed #ccc; border-radius: 12px;
+  font-size: 14px; font-weight: 600; color: var(--text-s); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+
+/* Support */
+.support-item {
+  margin: 0 16px; background: #fff; border-radius: 12px;
+  padding: 16px; box-shadow: var(--shadow-sm); border: 1.5px solid #eee;
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+}
+.support-item + .support-item { margin-top: 8px; }
+.support-item .si-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.support-item .si-label { font-size: 14px; font-weight: 600; flex: 1; }
+.support-item .si-arrow { color: #ccc; font-size: 18px; }
+
+/* Settings */
+.set-item {
+  margin: 0 16px; background: #fff; padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+}
+.set-item:last-child { border-bottom: none; border-radius: 0 0 12px 12px; }
+.set-item:first-child { border-radius: 12px 12px 0 0; }
+.set-item .si-left { display: flex; align-items: center; gap: 10px; }
+.set-item .si-label { font-size: 14px; font-weight: 500; }
+.set-item .si-val { font-size: 13px; color: var(--text-xs); }
+.set-item .si-arrow-s { color: #ccc; font-size: 16px; }
+.set-section { margin: 12px 16px 0; }
+.set-section .set-item { border-radius: 0; }
+.set-section .set-item:first-child { border-radius: 12px 12px 0 0; }
+.set-section .set-item:last-child { border-radius: 0 0 12px 12px; }
+.set-section .set-item:only-child { border-radius: 12px; }
+
+/* Favorites */
+.fav-empty { text-align: center; padding: 60px 20px; color: var(--text-xs); }
+.fav-empty .fe-icon { font-size: 64px; margin-bottom: 12px; opacity: 0.5; }
+.fav-empty .fe-text { font-size: 14px; margin-bottom: 4px; }
+
+/* Earnings */
+.earning-summary {
+  margin: 16px; background: linear-gradient(135deg, #0D1B2A, #1B2D45);
+  border-radius: 16px; padding: 20px; color: #fff;
+}
+.earning-summary .es-row { display: flex; justify-content: space-around; margin-bottom: 16px; }
+.earning-summary .es-item { text-align: center; flex: 1; }
+.earning-summary .es-val { font-size: 22px; font-weight: 800; }
+.earning-summary .es-lbl { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+.earning-card {
+  margin: 8px 16px; background: #fff; border-radius: 12px;
+  padding: 14px 16px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 12px;
+}
+.earning-card .ec-icon { width: 40px; height: 40px; border-radius: 10px; background: #F0FDF4; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.earning-card .ec-info { flex: 1; }
+.earning-card .ec-date { font-size: 12px; color: var(--text-xs); }
+.earning-card .ec-service { font-size: 14px; font-weight: 600; }
+.earning-card .ec-amount { font-size: 16px; font-weight: 800; color: #10B981; }
+
+/* Admin sub pages */
+.admin-sub-header {
+  background: linear-gradient(135deg, #0F172A, #1E3A5F);
+  color: #fff; padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 17px; font-weight: 700; flex-shrink: 0;
+}
+.admin-sub-header .back-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: none; background: rgba(255,255,255,0.2); color: #fff;
+  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.admin-order-card {
+  margin: 8px 16px; background: #fff; border-radius: 12px;
+  padding: 14px 16px; box-shadow: var(--shadow-sm);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.admin-order-card .aoc-left { flex: 1; }
+.admin-order-card .aoc-id { font-size: 11px; color: var(--text-xs); }
+.admin-order-card .aoc-service { font-size: 14px; font-weight: 600; margin: 2px 0; }
+.admin-order-card .aoc-meta { font-size: 12px; color: var(--text-s); }
+.admin-order-card .aoc-amount { font-size: 16px; font-weight: 800; }
+.admin-order-card .aoc-status { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; margin-top: 4px; display: inline-block; }
+.aoc-ongoing { background: #FEF3C7; color: #D97706; }
+.aoc-done { background: #D1FAE5; color: #059669; }
+.aoc-pending { background: #FEE2E2; color: #DC2626; }
+
+.admin-th-card {
+  margin: 8px 16px; background: #fff; border-radius: 12px;
+  padding: 14px 16px; box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; gap: 12px;
+}
+.admin-th-card .atc-avatar { width: 48px; height: 48px; border-radius: 12px; background: #F0F4FF; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+.admin-th-card .atc-info { flex: 1; }
+.admin-th-card .atc-name { font-size: 15px; font-weight: 700; }
+.admin-th-card .atc-shop { font-size: 12px; color: var(--text-s); }
+.admin-th-card .atc-status { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+.atc-online { background: #D1FAE5; color: #059669; }
+.atc-offline { background: #F3F4F6; color: #6B7280; }
+.atc-busy { background: #FEF3C7; color: #D97706; }
+
+/* Filter tabs in sub pages */
+.filter-tabs {
+  display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; flex-shrink: 0;
+}
+.filter-tab {
+  padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+  border: 1.5px solid #eee; background: #fff; color: var(--text-s); cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
+}
+.filter-tab.on {
+  background: var(--p); color: #fff; border-color: var(--p);
+}
+
+/* Service list cards */
+.svc-card {
+  margin: 8px 16px; background: #fff; border-radius: 12px;
+  padding: 16px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 14px;
+  cursor: pointer; border: 1.5px solid transparent; transition: border-color 0.2s;
+}
+.svc-card:hover { border-color: var(--p); }
+.svc-card .svc-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+.svc-card .svc-info { flex: 1; }
+.svc-card .svc-name { font-size: 15px; font-weight: 700; }
+.svc-card .svc-desc { font-size: 12px; color: var(--text-s); margin-top: 2px; }
+.svc-card .svc-price { font-size: 13px; color: var(--text-s); margin-top: 4px; }
+.svc-card .svc-price b { color: var(--p); font-size: 16px; }
+.svc-card .svc-arrow { color: #ccc; font-size: 20px; }
+
+/* Review page */
+.review-section { padding: 16px; text-align: center; }
+.review-section .rs-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.review-section .rs-sub { font-size: 13px; color: var(--text-s); margin-bottom: 8px; }
+.review-textarea {
+  width: calc(100% - 32px); margin: 16px; min-height: 120px; border: 1.5px solid #eee;
+  border-radius: 12px; padding: 14px; font-size: 14px; font-family: inherit; resize: vertical;
+  outline: none;
+}
+.review-textarea:focus { border-color: var(--p); }
+.submit-review-btn {
+  width: calc(100% - 32px); margin: 0 16px 24px; height: 48px; border: none;
+  background: var(--p); color: #fff; font-size: 16px; font-weight: 700;
+  border-radius: 12px; cursor: pointer;
+}
+
+/* Therapist detail page */
+.th-detail-hero {
+  background: linear-gradient(180deg, var(--p) 0%, var(--p) 40%, #fff 40%);
+  text-align: center; padding: 16px 16px 30px;
+}
+.th-detail-avatar {
+  width: 80px; height: 80px; border-radius: 24px; background: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 48px;
+  margin: 0 auto 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.th-detail-name { font-size: 20px; font-weight: 800; color: #222; }
+.th-detail-meta { font-size: 13px; color: var(--text-s); display: flex; justify-content: center; gap: 16px; margin: 6px 0; }
+.th-detail-meta span { display: flex; align-items: center; gap: 4px; }
+.th-detail-tags { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+.th-detail-tags .tag { font-size: 11px; background: #FFF0EB; color: var(--p); padding: 3px 10px; border-radius: 10px; font-weight: 600; }
+.th-detail-section { padding: 12px 16px 0; }
+.th-detail-section h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #333; }
+.th-detail-section .about-text { font-size: 13px; color: var(--text-s); line-height: 1.7; }
+.detail-svc-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; background: var(--bg); border-radius: 10px; margin-bottom: 8px;
+}
+.detail-svc-item .dsv-name { font-size: 14px; font-weight: 600; }
+.detail-svc-item .dsv-dur { font-size: 12px; color: var(--text-s); }
+.detail-svc-item .dsv-price { font-size: 15px; font-weight: 800; color: var(--p); }
+.detail-book-btn {
+  width: calc(100% - 32px); margin: 16px 16px 0; height: 48px;
+  background: var(--p); color: #fff; font-size: 16px; font-weight: 700;
+  border: none; border-radius: 12px; cursor: pointer;
+}
+
+/* Section title for sub pages */
+.section-title-sm {
+  font-size: 14px; font-weight: 700; color: #333;
+  padding: 16px 16px 6px;
+}
+
+     PAGE 1: USER HOME
+════════════════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="hero-header">
+    <div class="hero-row">
+      <div>
+        <div class="hero-greet" id="greet-text">晚上好 👋</div>
+        <div class="hero-name" id="hero-name">李小姐</div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-loc">📍 ວຽງຈັນ</div>
+        <div class="hero-avatar">😊</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-content has-nav" id="home-scroll">
+    <!-- Banner -->
+    <div class="banner-wrap">
+      <div class="banner-scroll">
+        <div class="banner-track" id="banner-track">
+          <div class="banner-slide">
+            <div class="bs-bg" style="background:linear-gradient(135deg,#FF3300,#FF6B3D,#FF9A6C);"></div>
+            <div class="banner-deco">💆‍♀️</div>
+            <div class="bs-content">
+              <span class="bs-tag" id="b1-tag">限時優惠</span>
+              <div>
+                <div class="bs-title" id="b1-title">首次體驗<br>8折優惠</div>
+                <div class="bs-sub" id="b1-sub">₭150,000 → <b>₭120,000</b> · 限新用戶</div>
+              </div>
+              <button class="bs-action-btn" style="color:#FF3300;" onclick="showToast('優惠已領取！')">立即搶購 →</button>
+            </div>
+          </div>
+          <div class="banner-slide">
+            <div class="bs-bg" style="background:linear-gradient(135deg,#0D5C2E,#1A8A47,#3DB868);"></div>
+            <div class="banner-deco">🌿</div>
+            <div class="bs-content">
+              <span class="bs-tag" id="b2-tag">本週推薦</span>
+              <div>
+                <div class="bs-title" id="b2-title">泰式按摩<br>全城最低價</div>
+                <div class="bs-sub" id="b2-sub">60分鐘 <b>₭130,000</b> · 含精油</div>
+              </div>
+              <button class="bs-action-btn" style="color:#0D5C2E;" onclick="goPage('page-book', {id:2})">了解詳情 →</button>
+            </div>
+          </div>
+          <div class="banner-slide">
+            <div class="bs-bg" style="background:linear-gradient(135deg,#2D1B69,#4A2E9B,#7B52D9);"></div>
+            <div class="banner-deco">⭐</div>
+            <div class="bs-content">
+              <span class="bs-tag" id="b3-tag">會員專屬</span>
+              <div>
+                <div class="bs-title" id="b3-title">月卡套餐<br>每月4次</div>
+                <div class="bs-sub" id="b3-sub"><b>₭480,000</b> · 省 ₭120,000</div>
+              </div>
+              <button class="bs-action-btn" style="color:#4A2E9B;" onclick="showToast('會員功能即將上線！')">立即開通 →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="banner-dots" id="banner-dots">
+        <span class="on" onclick="goBanner(0)"></span>
+        <span onclick="goBanner(1)"></span>
+        <span onclick="goBanner(2)"></span>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="section-title">
+      <h3 id="cat-title">服務分類</h3>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-item" onclick="goPage('page-services')"><div class="cat-icon c1">🤲</div><div class="cat-label" id="cat1">寮式按摩</div></div>
+      <div class="cat-item" onclick="goPage('page-services')"><div class="cat-icon c2">🙏</div><div class="cat-label" id="cat2">泰式按摩</div></div>
+      <div class="cat-item" onclick="goPage('page-services')"><div class="cat-icon c3">🌿</div><div class="cat-label" id="cat3">精油按摩</div></div>
+      <div class="cat-item" onclick="goPage('page-services')"><div class="cat-icon c4">🦶</div><div class="cat-label" id="cat4">腳底按摩</div></div>
+      <div class="cat-item" onclick="goPage('page-services')"><div class="cat-icon c5">💆</div><div class="cat-label" id="cat5">頭頸肩背</div></div>
+      <div class="cat-item" onclick="goPage('page-services')"><div class="cat-icon c6">✨</div><div class="cat-label" id="cat6">全部服務</div></div>
+    </div>
+
+    <!-- Therapist List -->
+    <div class="section-title">
+      <h3 id="nearby-title">附近技師</h3>
+      <a id="see-all">查看全部</a>
+    </div>
+    <div class="therapist-list" id="therapist-list">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav" id="nav-user">
+    <button class="nav-item active" onclick="switchNav('home', this)">
+      <span class="nav-icon">🏠</span>
+      <span id="nav-home-label">首頁</span>
+    </button>
+    <button class="nav-item" onclick="switchNav('orders', this)">
+      <span class="nav-icon">📋</span>
+      <span id="nav-orders-label">訂單</span>
+      <div class="nav-badge">1</div>
+    </button>
+    <button class="nav-item" onclick="switchNav('profile', this)">
+      <span class="nav-icon">👤</span>
+      <span id="nav-profile-label">我的</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 2: BOOKING
+════════════════════════════════════════════════════ -->
+<div id="page-book" class="page">
+  <div class="book-therapist-hero">
+    <div class="bth-avatar" id="book-avatar">💆‍♀️</div>
+    <div>
+      <div class="bth-name" id="book-therapist-name">Nana · 娜娜</div>
+      <div class="bth-rating">
+        <span class="stars">★★★★★</span>
+        <span id="book-rating">4.9</span>
+        <span style="color:rgba(255,255,255,0.6);">·</span>
+        <span id="book-orders-count">280+</span>
+        <span id="bk-orders-label" style="color:rgba(255,255,255,0.6);">次服務</span>
+      </div>
+      <div class="bth-tags">
+        <span class="bth-tag" id="bk-tag1">全身按摩</span>
+        <span class="bth-tag" id="bk-tag2">泰式</span>
+      </div>
+    </div>
+    <button onclick="goBack()" style="margin-left:auto;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.18);border:none;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;">✕</button>
+  </div>
+
+  <div class="page-content" style="padding-bottom:80px;">
+    <!-- Service Selection -->
+    <div class="book-section">
+      <div class="book-section-title" id="bk-service-title">選擇服務</div>
+      <div id="service-list">
+        <div class="service-item selected" onclick="selectService(this,'lao-60','₭100,000')" data-price="100000">
+          <div class="si-icon" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2);">🤲</div>
+          <div class="si-info">
+            <div class="si-name" id="s1-name">寮式傳統按摩 60分鐘</div>
+            <div class="si-desc" id="s1-desc">老撾傳統手法，舒筋活絡</div>
+          </div>
+          <div class="si-price">₭100,000</div>
+          <div class="si-radio checked"></div>
+        </div>
+        <div class="service-item" onclick="selectService(this,'lao-90','₭150,000')" data-price="150000">
+          <div class="si-icon" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2);">🤲</div>
+          <div class="si-info">
+            <div class="si-name" id="s2-name">寮式傳統按摩 90分鐘</div>
+            <div class="si-desc" id="s2-desc">深度放鬆，消除全身疲勞</div>
+          </div>
+          <div class="si-price">₭150,000</div>
+          <div class="si-radio"></div>
+        </div>
+        <div class="service-item" onclick="selectService(this,'thai-60','₭120,000')" data-price="120000">
+          <div class="si-icon" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);">🙏</div>
+          <div class="si-info">
+            <div class="si-name" id="s3-name">泰式按摩 60分鐘</div>
+            <div class="si-desc" id="s3-desc">傳統泰式伸展，活絡筋骨</div>
+          </div>
+          <div class="si-price">₭120,000</div>
+          <div class="si-radio"></div>
+        </div>
+        <div class="service-item" onclick="selectService(this,'thai-90','₭180,000')" data-price="180000">
+          <div class="si-icon" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);">🙏</div>
+          <div class="si-info">
+            <div class="si-name" id="s4-name">泰式按摩 90分鐘</div>
+            <div class="si-desc" id="s4-desc">深度泰式按壓，恢復柔韌性</div>
+          </div>
+          <div class="si-price">₭180,000</div>
+          <div class="si-radio"></div>
+        </div>
+        <div class="service-item" onclick="selectService(this,'oil-60','₭150,000')" data-price="150000">
+          <div class="si-icon" style="background:linear-gradient(135deg,#F3E5F5,#E1BEE7);">🌿</div>
+          <div class="si-info">
+            <div class="si-name" id="s5-name">精油按摩 60分鐘</div>
+            <div class="si-desc" id="s5-desc">天然香薰精油，滋潤肌膚放鬆</div>
+          </div>
+          <div class="si-price">₭150,000</div>
+          <div class="si-radio"></div>
+        </div>
+        <div class="service-item" onclick="selectService(this,'foot-60','₭80,000')" data-price="80000">
+          <div class="si-icon" style="background:linear-gradient(135deg,#FFF8E1,#FFECB3);">🦶</div>
+          <div class="si-info">
+            <div class="si-name" id="s6-name">腳底按摩 60分鐘</div>
+            <div class="si-desc" id="s6-desc">刺激足部穴位，緩解腿部疲勞</div>
+          </div>
+          <div class="si-price">₭80,000</div>
+          <div class="si-radio"></div>
+        </div>
+        <div class="service-item" onclick="selectService(this,'head-45','₭60,000')" data-price="60000">
+          <div class="si-icon" style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB);">💆</div>
+          <div class="si-info">
+            <div class="si-name" id="s7-name">頭頸肩背 45分鐘</div>
+            <div class="si-desc" id="s7-desc">針對辦公族，解除頸肩酸痛</div>
+          </div>
+          <div class="si-price">₭60,000</div>
+          <div class="si-radio"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Time Selection -->
+    <div class="book-section">
+      <div class="book-section-title" id="bk-time-title">預約時間</div>
+      <div class="time-grid">
+        <div class="time-slot" onclick="selectTime(this)">09:00</div>
+        <div class="time-slot" onclick="selectTime(this)">10:00</div>
+        <div class="time-slot full" id="ts-full">已滿</div>
+        <div class="time-slot" onclick="selectTime(this)">12:00</div>
+        <div class="time-slot" onclick="selectTime(this)">13:00</div>
+        <div class="time-slot selected" onclick="selectTime(this)">14:00</div>
+        <div class="time-slot" onclick="selectTime(this)">15:00</div>
+        <div class="time-slot" onclick="selectTime(this)">16:00</div>
+        <div class="time-slot" onclick="selectTime(this)">18:00</div>
+        <div class="time-slot" onclick="selectTime(this)">19:00</div>
+        <div class="time-slot" onclick="selectTime(this)">20:00</div>
+        <div class="time-slot" onclick="selectTime(this)">21:00</div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="book-section">
+      <div class="book-section-title" id="bk-addr-title">上門地址</div>
+      <div class="addr-input" onclick="showToast('地址選擇功能即將上線')">
+        <span>📍</span>
+        <span id="addr-placeholder">Ban Dong Rd, Xaysettha, Vientiane</span>
+        <span style="color:var(--p);font-size:12px;font-weight:700;">修改</span>
+      </div>
+    </div>
+
+    <!-- Cash Notice -->
+    <div class="book-section">
+      <div class="cash-notice">
+        <div class="cn-head">💵 <span id="cash-notice-title">現場現金付款</span></div>
+        <p id="cash-notice-body">本平台採用<b>現場現金付款</b>方式，無需線上預付。<br>服務完成後，請直接將費用交給技師。<br>技師完成服務後將向平台繳交手續費。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Footer -->
+  <div class="book-footer">
+    <div class="book-footer-top">
+      <div>
+        <div class="bf-label" id="bf-total-label">現場付款金額</div>
+        <div class="bf-total" id="bf-total">₭150,000</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="bf-label" id="bf-fee-label">技師手續費</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text-s);" id="bf-fee">₭22,500 (15%)</div>
+      </div>
+    </div>
+    <button class="book-confirm-btn" id="book-confirm-btn" onclick="confirmBooking()">確認預約</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 3: ORDER TRACKING
+════════════════════════════════════════════════════ -->
+<div id="page-order" class="page">
+  <div class="order-hero">
+    <div class="oh-status-row">
+      <div>
+        <div class="oh-label" id="oh-label">訂單狀態</div>
+        <div class="oh-status" id="oh-status">技師趕來中</div>
+        <div class="oh-time" id="oh-time">預計到達 14:30 · 約15分鐘</div>
+      </div>
+      <div class="oh-id" id="oh-id">#VM240622</div>
+    </div>
+  </div>
+
+  <div class="page-content" style="padding-bottom:20px;">
+    <!-- Therapist Float Card -->
+    <div class="therapist-float-card">
+      <div class="tfc-row">
+        <div class="tfc-avatar">💆‍♀️</div>
+        <div>
+          <div class="tfc-name">Nana · 娜娜</div>
+          <div class="tfc-eta" id="tfc-eta">⚡ 預計15分鐘後到達</div>
+        </div>
+        <div class="tfc-btns">
+          <div class="tfc-btn" onclick="showToast('正在撥打電話...')">📞</div>
+          <div class="tfc-btn" onclick="showToast('訊息功能即將上線')">💬</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cash Reminder -->
+    <div style="height:12px;"></div>
+    <div class="cash-reminder-card">
+      <div class="crc-head">💵 <span id="cr-title">請準備現金</span></div>
+      <div class="crc-amount" id="cr-amount">₭150,000</div>
+      <div class="crc-label" id="cr-label">全身按摩 60分鐘 · 服務完成後交給技師</div>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="progress-card">
+      <h4 id="progress-title">服務進度</h4>
+      <div id="progress-steps">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Order Details Card -->
+    <div class="fee-card" style="margin-bottom:12px;">
+      <div class="fee-card-title orange" id="order-detail-title">訂單詳情</div>
+      <div class="fee-row">
+        <span class="k" id="od-no">訂單編號</span>
+        <span class="v">#VM240622</span>
+      </div>
+      <div class="fee-row">
+        <span class="k" id="od-service">服務項目</span>
+        <span class="v" id="od-service-val">全身按摩 60分鐘</span>
+      </div>
+      <div class="fee-row">
+        <span class="k" id="od-addr">服務地址</span>
+        <span class="v" style="font-size:12px;text-align:right;max-width:60%;">Ban Dong Rd, Xaysettha</span>
+      </div>
+      <div class="fee-row">
+        <span class="k" id="od-time">預約時間</span>
+        <span class="v">2026-06-22 14:00</span>
+      </div>
+      <div class="fee-row">
+        <span class="k" id="od-amount">現金金額</span>
+        <span class="v" style="color:var(--p);font-weight:800;">₭150,000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back button -->
+  <button onclick="goPage('page-home')" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid var(--p);color:var(--p);font-size:14px;font-weight:700;padding:12px 28px;border-radius:25px;cursor:pointer;box-shadow:var(--shadow-lg);z-index:50;" id="back-home-btn">← 返回首頁</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 4: ORDER LIST
+════════════════════════════════════════════════════ -->
+<div id="page-orders" class="page">
+  <div class="header">
+    <div class="title" id="orders-page-title">我的訂單</div>
+  </div>
+
+  <div class="filter-tabs">
+    <button class="filter-tab active" id="ft-all" onclick="filterOrders('all',this)">全部</button>
+    <button class="filter-tab" id="ft-ongoing" onclick="filterOrders('ongoing',this)">進行中</button>
+    <button class="filter-tab" id="ft-done" onclick="filterOrders('done',this)">已完成</button>
+    <button class="filter-tab" id="ft-cancelled" onclick="filterOrders('cancelled',this)">已取消</button>
+  </div>
+
+  <div class="page-content has-nav" id="order-list-content">
+    <!-- rendered by JS -->
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="switchNavOrders('home')">
+      <span class="nav-icon">🏠</span>
+      <span id="nav-home-l2">首頁</span>
+    </button>
+    <button class="nav-item active" onclick="switchNavOrders('orders')">
+      <span class="nav-icon">📋</span>
+      <span id="nav-orders-l2">訂單</span>
+    </button>
+    <button class="nav-item" onclick="switchNavOrders('profile')">
+      <span class="nav-icon">👤</span>
+      <span id="nav-profile-l2">我的</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 5: PROFILE
+════════════════════════════════════════════════════ -->
+<div id="page-profile" class="page">
+  <div class="profile-hero">
+    <div class="profile-avatar">😊</div>
+    <div class="profile-name" id="profile-name-text">李小姐</div>
+    <div class="profile-sub">📍 ວຽງຈັນ, Laos</div>
+    <div class="profile-stats">
+      <div class="ps-item"><div class="v">12</div><div class="l" id="ps-orders">次訂單</div></div>
+      <div class="ps-item"><div class="v">4.9</div><div class="l" id="ps-rating">評分</div></div>
+      <div class="ps-item"><div class="v" id="ps-spent">₭1.8M</div><div class="l" id="ps-spend-label">消費</div></div>
+    </div>
+  </div>
+
+  <div class="page-content has-nav">
+    <!-- Mode Switch -->
+    <div style="padding:16px 16px 0;">
+      <div style="font-size:12px;color:var(--text-xs);font-weight:600;margin-bottom:8px;" id="mode-switch-label">切換模式預覽</div>
+    </div>
+    <div class="mode-card">
+      <button class="mode-btn active" id="mode-user" onclick="switchMode('user',this)">👤 用戶端</button>
+      <button class="mode-btn" id="mode-therapist" onclick="switchMode('therapist',this)">💆 技師端</button>
+      <button class="mode-btn" id="mode-admin" onclick="switchMode('admin',this)">⚙️ 後台</button>
+    </div>
+
+    <!-- Menu -->
+    <div class="menu-section" style="margin-top:12px;">
+      <div class="menu-item" onclick="goPage('page-coupon')">
+        <div class="menu-icon" style="background:#FFF0EB;">🎁</div>
+        <div class="menu-label" id="menu-coupon">優惠券</div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="goPage('page-favorites')">
+        <div class="menu-icon" style="background:#EBF5FF;">⭐</div>
+        <div class="menu-label" id="menu-collect">收藏技師</div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="goPage('page-address')">
+        <div class="menu-icon" style="background:#F0FFF4;">📍</div>
+        <div class="menu-label" id="menu-address">我的地址</div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="goPage('page-support')">
+        <div class="menu-icon" style="background:#FFF8E1;">💬</div>
+        <div class="menu-label" id="menu-support">客服支援</div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="goPage('page-settings')">
+        <div class="menu-icon" style="background:#F5E6FF;">🔔</div>
+        <div class="menu-label" id="menu-notify">通知設定</div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="goPage('page-settings')">
+        <div class="menu-icon" style="background:#FFE8EC;">⚙️</div>
+        <div class="menu-label" id="menu-settings">設定</div>
+        <div class="menu-arrow">›</div>
+      </div>
+    </div>
+
+    <div style="height:16px;"></div>
+    <button onclick="showToast('已退出登入')" style="width:calc(100% - 32px);margin:0 16px;height:48px;background:#fff;border:1.5px solid #eee;border-radius:var(--r-lg);color:var(--text-s);font-size:14px;font-weight:700;cursor:pointer;" id="logout-btn">退出登入</button>
+    <div style="height:20px;"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="switchNavProfile('home')">
+      <span class="nav-icon">🏠</span>
+      <span id="nav-home-l3">首頁</span>
+    </button>
+    <button class="nav-item" onclick="switchNavProfile('orders')">
+      <span class="nav-icon">📋</span>
+      <span id="nav-orders-l3">訂單</span>
+    </button>
+    <button class="nav-item active" onclick="switchNavProfile('profile')">
+      <span class="nav-icon">👤</span>
+      <span id="nav-profile-l3">我的</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 6: THERAPIST HOME
+════════════════════════════════════════════════════ -->
+<div id="page-therapist" class="page">
+  <div class="therapist-hero">
+    <div class="th-row">
+      <div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);" id="th-greet">歡迎回來</div>
+        <div style="font-size:20px;font-weight:800;color:#fff;margin-top:3px;" id="th-name">Nana · 娜娜</div>
+      </div>
+      <div class="th-notif" onclick="showToast('您有1條新通知')">
+        🔔<div class="th-notif-dot"></div>
+      </div>
+    </div>
+    <div class="th-stats">
+      <div class="th-stat">
+        <div class="val">₭450,000</div>
+        <div class="lbl" id="th-stat1">今日收入</div>
+      </div>
+      <div class="th-stat">
+        <div class="val">3</div>
+        <div class="lbl" id="th-stat2">今日訂單</div>
+      </div>
+      <div class="th-stat">
+        <div class="val">₭22,500</div>
+        <div class="lbl" id="th-stat3">待繳手續費</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-content" style="padding-bottom:20px;">
+    <!-- Toggle Card -->
+    <div class="toggle-card">
+      <div class="toggle-info">
+        <div class="label" id="toggle-label">接單狀態</div>
+        <div class="sub on" id="toggle-sub">● 接單中</div>
+      </div>
+      <div class="toggle-sw on" id="toggle-sw" onclick="toggleOnline()">
+        <div class="toggle-knob"></div>
+      </div>
+    </div>
+
+    <!-- Fee Alert -->
+    <div class="fee-alert">
+      <div class="fa-head">⚠️ <span id="fa-title">手續費待繳</span></div>
+      <p class="fa-p" id="fa-body">您有1筆訂單的平台手續費尚未繳交。<b>繳清後方可接受新訂單。</b><br>待繳金額：<b>₭22,500</b></p>
+      <button class="fa-btn" onclick="goPage('page-fee')" id="fa-btn">立即繳交 →</button>
+    </div>
+
+    <!-- Quick Links -->
+    <div style="display:flex;gap:10px;margin:12px 16px 0;">
+      <button onclick="goPage('page-th-orders')" style="flex:1;height:44px;background:#fff;border:1.5px solid #eee;border-radius:12px;font-size:13px;font-weight:700;color:#333;cursor:pointer;" id="thl-orders-btn">📋 訂單記錄</button>
+      <button onclick="goPage('page-th-earnings')" style="flex:1;height:44px;background:#fff;border:1.5px solid #eee;border-radius:12px;font-size:13px;font-weight:700;color:#333;cursor:pointer;" id="thl-earn-btn">💰 收入明細</button>
+    </div>
+
+    <!-- New Order Card -->
+    <div style="padding:16px 16px 0;">
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:12px;" id="th-orders-title">待處理訂單</div>
+      <div class="order-card">
+        <div class="oc-head">
+          <span class="oc-chip new" id="oc-new-chip">新訂單</span>
+          <span style="font-size:12px;color:var(--text-xs);">2分鐘前</span>
+        </div>
+        <div class="oc-service" id="oc-service">全身按摩 60分鐘</div>
+        <div class="oc-detail">
+          <span>📍 Ban Dong Rd, Xaysettha, Vientiane</span>
+          <span>⏰ 今天 14:00 · <span id="oc-client">客戶：李小姐</span></span>
+        </div>
+        <div class="oc-bottom">
+          <div class="oc-fee">
+            <span id="oc-cash-label">客戶付現</span>：<strong>₭150,000</strong><br>
+            <span id="oc-fee-label">平台手續費</span>：<strong>₭22,500</strong>
+          </div>
+          <div class="oc-btns">
+            <button class="btn-outline-sm" onclick="showToast('已拒絕訂單')" id="oc-reject">拒絕</button>
+            <button class="btn-fill-sm" onclick="showToast('已接受訂單！正在前往...')" id="oc-accept">接受</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completed order -->
+    <div style="padding:12px 16px 0;">
+      <div class="order-card">
+        <div class="oc-head">
+          <span class="oc-chip inprog" id="oc-done-chip">服務中</span>
+          <span style="font-size:12px;color:var(--text-xs);">30分鐘前</span>
+        </div>
+        <div class="oc-service" id="oc-service2">泰式按摩 60分鐘</div>
+        <div class="oc-detail">
+          <span>📍 Tha Deua Rd, Xaysettha</span>
+          <span>⏰ 今天 12:00 · <span id="oc-client2">客戶：陳先生</span></span>
+        </div>
+        <div class="oc-bottom">
+          <div class="oc-fee">
+            <span id="oc-cash-label2">客戶付現</span>：<strong>₭130,000</strong>
+          </div>
+          <div class="oc-btns">
+            <button class="btn-fill-sm" onclick="goPage('page-fee')" id="oc-complete">完成並繳費</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Go to Profile -->
+    <button onclick="goPage('page-therapist-profile')" style="width:calc(100% - 32px);margin:16px 16px 0;height:44px;background:#fff;border:1.5px solid #eee;border-radius:var(--r-lg);color:var(--text-s);font-size:13px;font-weight:700;cursor:pointer;" id="th-profile-btn">查看技師資料 ›</button>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 6B: THERAPIST PROFILE
+════════════════════════════════════════════════════ -->
+<div id="page-therapist-profile" class="page">
+  <div class="header">
+    <button class="back-btn" onclick="goBack()">‹</button>
+    <div class="title" id="tp-title">技師資料</div>
+    <div class="actions">
+      <button class="action-btn" onclick="showToast(lang==='zh'?'編輯功能即將上線':lang==='en'?'Edit coming soon':'กำลังพัฒนา')" id="tp-edit-icon">✏️</button>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <div class="tp-hero-curve">
+      <div class="tp-avatar-wrap">
+        <div class="tp-avatar" id="tp-emoji">💆‍♀️</div>
+        <div class="tp-badge">✓</div>
+      </div>
+      <div class="tp-name" id="tp-name">Nana · 娜娜</div>
+      <div class="tp-role-tag" id="tp-role">資深按摩技師</div>
+      <div class="tp-rating-row">
+        <div class="tp-stars">★★★★★</div>
+        <div class="tp-rating-val">4.9</div>
+        <div class="tp-review-count" id="tp-reviews">(280 則評價)</div>
+      </div>
+      <div class="tp-stats-row">
+        <div class="tp-stat-item">
+          <div class="v">280+</div>
+          <div class="l" id="tp-s-orders">已完成訂單</div>
+        </div>
+        <div class="tp-stat-item">
+          <div class="v" id="tp-s-years">3 年</div>
+          <div class="l" id="tp-s-exp">服務年資</div>
+        </div>
+        <div class="tp-stat-item">
+          <div class="v">98%</div>
+          <div class="l" id="tp-s-rate">好評率</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tp-content">
+      <!-- Services -->
+      <div class="tp-section">
+        <div class="tp-section-title" id="tp-svc-title">提供服務</div>
+        <div id="tp-svc-list">
+          <div class="tp-svc-item">
+            <div>
+              <div class="tp-svc-name" id="tp-s1-name">全身按摩</div>
+              <div class="tp-svc-dur">60 分鐘 / 90 分鐘</div>
+            </div>
+            <div class="tp-svc-price">₭150,000</div>
+          </div>
+          <div class="tp-svc-item">
+            <div>
+              <div class="tp-svc-name" id="tp-s2-name">泰式按摩</div>
+              <div class="tp-svc-dur">60 分鐘</div>
+            </div>
+            <div class="tp-svc-price">₭120,000</div>
+          </div>
+          <div class="tp-svc-item">
+            <div>
+              <div class="tp-svc-name" id="tp-s3-name">精油按摩</div>
+              <div class="tp-svc-dur">60 分鐘</div>
+            </div>
+            <div class="tp-svc-price">₭150,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="tp-section">
+        <div class="tp-section-title" id="tp-about-title">關於我</div>
+        <div class="tp-about-text" id="tp-about-text">
+          擁有 3 年專業按摩經驗，擅長寮式傳統手法與精油 SPA。曾在萬象多家知名按摩店服務，熟悉各種客戶需求。服務細心、手法專業，致力於為每位客戶帶來最舒適的放鬆體驗。
+        </div>
+      </div>
+
+      <!-- Schedule -->
+      <div class="tp-section">
+        <div class="tp-section-title" id="tp-sch-title">服務時間</div>
+        <div class="tp-schedule-list">
+          <div class="tp-sch-item">
+            <span class="tp-sch-day" id="tp-sch-day1">週一至週五</span>
+            <span class="tp-sch-time">10:00 - 22:00</span>
+            <span class="tp-sch-dot"></span>
+          </div>
+          <div class="tp-sch-item">
+            <span class="tp-sch-day" id="tp-sch-day2">週六至週日</span>
+            <span class="tp-sch-time">12:00 - 20:00</span>
+            <span class="tp-sch-dot"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shop -->
+      <div class="tp-section">
+        <div class="tp-section-title" id="tp-shop-title">合作店家</div>
+        <div class="tp-shop-card">
+          <div class="tp-shop-icon">🏪</div>
+          <div class="tp-shop-info">
+            <div class="n" id="tp-shop-name">Vientiane Wellness 按摩中心</div>
+            <div class="s" id="tp-shop-addr">Sisattanak, Vientiane · 12 位技師</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certifications -->
+      <div class="tp-section">
+        <div class="tp-section-title" id="tp-cert-title">專業認證</div>
+        <div class="tp-cert-tags">
+          <span class="tp-cert-tag">📜 <span id="tp-cert1">寮式傳統按摩認證</span></span>
+          <span class="tp-cert-tag">📜 <span id="tp-cert2">泰式按摩 Lv.2</span></span>
+          <span class="tp-cert-tag">📜 <span id="tp-cert3">芳香精油 SPA 證書</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 7: FEE PAYMENT
+════════════════════════════════════════════════════ -->
+<div id="page-fee" class="page">
+  <div class="header">
+    <button class="back-btn" onclick="goBack()">‹</button>
+    <div class="title" id="fee-page-title">手續費繳交</div>
+  </div>
+
+  <div class="fee-warning-bar">
+    ⚠️ <span id="fee-warning-text">手續費未繳清前，您無法接受新訂單</span>
+  </div>
+
+  <div class="page-content" style="padding-bottom:80px;">
+    <!-- Order Summary -->
+    <div class="fee-card">
+      <div class="fee-card-title orange" id="fee-order-title">訂單摘要</div>
+      <div class="fee-summary">
+        <div class="fs-item">
+          <div class="v" id="fo-service">全身按摩 60min</div>
+          <div class="l" id="fo-service-l">服務項目</div>
+        </div>
+        <div class="fs-item">
+          <div class="v">₭150,000</div>
+          <div class="l" id="fo-amount-l">客戶付現</div>
+        </div>
+        <div class="fs-item">
+          <div class="v">15%</div>
+          <div class="l" id="fo-rate-l">手續費率</div>
+        </div>
+      </div>
+      <div class="fee-row total">
+        <span class="k" id="fo-total-l">應繳手續費</span>
+        <span class="v">₭22,500</span>
+      </div>
+      <div class="fee-highlight">
+        <div class="fh-amount">₭22,500</div>
+        <div class="fh-label" id="fh-label">請轉帳此金額至公司帳戶</div>
+      </div>
+    </div>
+
+    <!-- Bank Info -->
+    <div class="fee-card">
+      <div class="fee-card-title blue" id="fee-bank-title">收款帳戶</div>
+      <div class="bank-info">
+        <div class="bi-row">
+          <span class="bi-k" id="bi-bank">銀行</span>
+          <span class="bi-v">BCEL（ທ.ຄ.ລ.）</span>
+        </div>
+        <div class="bi-row">
+          <span class="bi-k" id="bi-account">帳號</span>
+          <span class="bi-v">
+            020-1-01-012345-001
+            <button class="copy-btn" onclick="copyText('020-1-01-012345-001')">複製</button>
+          </span>
+        </div>
+        <div class="bi-row">
+          <span class="bi-k" id="bi-name-l">戶名</span>
+          <span class="bi-v">Vientiane Wellness Co., Ltd</span>
+        </div>
+        <div class="bi-row">
+          <span class="bi-k" id="bi-ref">轉帳備注</span>
+          <span class="bi-v">
+            #VM240622
+            <button class="copy-btn" onclick="copyText('#VM240622')">複製</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Proof -->
+    <div class="fee-card">
+      <div class="fee-card-title green" id="fee-upload-title">上傳轉帳憑證</div>
+      <div class="upload-box" id="upload-box" onclick="simulateUpload()">
+        <div class="ub-icon">📸</div>
+        <div class="ub-text" id="ub-text">點擊上傳截圖</div>
+        <div class="ub-sub" id="ub-sub">支援 JPG / PNG，最大 10MB</div>
+      </div>
+      <div id="uploaded-preview" style="display:none;" class="uploaded-preview">
+        <span class="up-icon">🖼️</span>
+        <div class="up-info">
+          <div class="name">transfer_proof.jpg</div>
+          <div class="size">1.2 MB · 已上傳</div>
+        </div>
+        <span class="up-del" onclick="removeUpload()">✕</span>
+      </div>
+    </div>
+
+    <div style="height:8px;"></div>
+  </div>
+
+  <div class="fee-page-footer">
+    <div class="warning-text">⚠️ <span id="fee-submit-warning">請確認已轉帳後再提交</span></div>
+    <button class="submit-btn" onclick="submitFee()" id="submit-fee-btn">提交繳費憑證</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 8: ADMIN DASHBOARD
+════════════════════════════════════════════════════ -->
+<div id="page-admin" class="page">
+  <div class="admin-hero">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <h2 id="admin-title">管理後台</h2>
+        <p id="admin-sub">Vientiane Wellness Co., Ltd</p>
+      </div>
+      <button onclick="showToast('功能即將上線')" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:12px;font-weight:700;padding:7px 14px;border-radius:20px;cursor:pointer;" id="admin-export-btn">導出報表</button>
+    </div>
+  </div>
+
+  <div class="page-content" style="padding-bottom:20px;">
+    <!-- Stats Grid -->
+    <div class="admin-stats-grid">
+      <div class="as-card">
+        <div class="val">₭2.8M</div>
+        <div class="lbl" id="as-gmv">本月 GMV</div>
+        <div class="trend trend-up">↑ +23%</div>
+      </div>
+      <div class="as-card">
+        <div class="val">₭420,000</div>
+        <div class="lbl" id="as-income">平台收入</div>
+        <div class="trend trend-up">↑ +18%</div>
+      </div>
+      <div class="as-card">
+        <div class="val">186</div>
+        <div class="lbl" id="as-orders">本月訂單</div>
+        <div class="trend trend-up">↑ +31%</div>
+      </div>
+      <div class="as-card">
+        <div class="val">12</div>
+        <div class="lbl" id="as-online">在線技師</div>
+        <div class="trend trend-down">↓ -2</div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="admin-section">
+      <div style="display:flex;gap:10px;">
+        <button onclick="goPage('page-admin-orders')" style="flex:1;height:44px;background:#fff;border:1.5px solid #ddd;border-radius:12px;font-size:13px;font-weight:700;color:#333;cursor:pointer;" id="al-orders-btn">📋 全部訂單</button>
+        <button onclick="goPage('page-admin-therapists')" style="flex:1;height:44px;background:#fff;border:1.5px solid #ddd;border-radius:12px;font-size:13px;font-weight:700;color:#333;cursor:pointer;" id="al-therapists-btn">💆 技師管理</button>
+      </div>
+    </div>
+
+    <!-- Fee Review -->
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h4 id="fee-review-title">手續費審核</h4>
+        <span class="more" onclick="goPage('page-admin-orders')">查看全部 ›</span>
+      </div>
+      <div class="review-item">
+        <div class="ri-info">
+          <div class="name">Nana · 娜娜</div>
+          <div class="sub">#VM240622 · 2026-06-22</div>
+        </div>
+        <div class="ri-right">
+          <div class="ri-amount">₭22,500</div>
+          <div class="ri-chip chip-review" id="chip-review">待審核</div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="ri-info">
+          <div class="name">Khamphet · 坎佩特</div>
+          <div class="sub">#VM240621 · 2026-06-21</div>
+        </div>
+        <div class="ri-right">
+          <div class="ri-amount">₭19,500</div>
+          <div class="ri-chip chip-pending" id="chip-pending">未繳交</div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="ri-info">
+          <div class="name">Souphavanh · 蘇法旺</div>
+          <div class="sub">#VM240620 · 2026-06-20</div>
+        </div>
+        <div class="ri-right">
+          <div class="ri-amount">₭27,000</div>
+          <div class="ri-chip chip-paid" id="chip-paid">已入帳</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fee Rate Settings -->
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h4 id="fee-rate-title">手續費費率設定</h4>
+        <span class="more" onclick="showToast('進入費率編輯')">編輯 ›</span>
+      </div>
+      <div class="rate-item">
+        <span class="ri-label" id="rate1-label">寮式按摩</span>
+        <span class="ri-rate">15%</span>
+      </div>
+      <div class="rate-item">
+        <span class="ri-label" id="rate2-label">泰式按摩</span>
+        <span class="ri-rate">12%</span>
+      </div>
+      <div class="rate-item">
+        <span class="ri-label" id="rate3-label">精油按摩</span>
+        <span class="ri-rate">15%</span>
+      </div>
+    </div>
+
+    <!-- Partner Shops -->
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h4 id="partner-title">合作按摩店</h4>
+        <span class="more" onclick="showToast('新增合作店')">+ 新增</span>
+      </div>
+      <div class="shop-item">
+        <div class="shop-icon">🏪</div>
+        <div class="shop-info">
+          <div class="sname">Vientiane Relax Center</div>
+          <div class="ssub" id="shop1-sub">6名技師 · 今日5人在線</div>
+        </div>
+        <span class="shop-chip chip-active" id="s-active">營業中</span>
+      </div>
+      <div class="shop-item">
+        <div class="shop-icon">🌿</div>
+        <div class="shop-info">
+          <div class="sname">Lao Wellness Spa</div>
+          <div class="ssub" id="shop2-sub">4名技師 · 今日4人在線</div>
+        </div>
+        <span class="shop-chip chip-active">營業中</span>
+      </div>
+      <div class="shop-item">
+        <div class="shop-icon">🌊</div>
+        <div class="shop-info">
+          <div class="sname">Mekong Therapy House</div>
+          <div class="ssub" id="shop3-sub">3名技師 · 審核中</div>
+        </div>
+        <span class="shop-chip chip-pending-s" id="s-pending">審核中</span>
+      </div>
+    </div>
+
+    <div style="height:20px;"></div>
+  </div>
+
+  <!-- Back -->
+  <button onclick="goPage('page-profile')" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid #3B82F6;color:#3B82F6;font-size:14px;font-weight:700;padding:12px 28px;border-radius:25px;cursor:pointer;box-shadow:var(--shadow-lg);z-index:50;" id="admin-back-btn">← 返回個人中心</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 9: THERAPIST DETAIL (User View)
+════════════════════════════════════════════════════ -->
+<div id="page-tdetail" class="page">
+  <div class="sub-header">
+    <button class="back-btn" onclick="goPage('page-home')">←</button>
+    <span id="tdetail-title">技師詳情</span>
+  </div>
+  <div class="sub-page-content">
+    <div class="th-detail-hero">
+      <div class="th-detail-avatar">💆‍♀️</div>
+      <div class="th-detail-name">Nana · 娜娜</div>
+      <div class="th-detail-meta">
+        <span>⭐ 4.9</span><span>·</span><span id="tdetail-reviews">280 評價</span><span>·</span><span>📍 <span id="tdetail-dist">1.2km</span></span>
+      </div>
+      <div class="th-detail-tags">
+        <span class="tag" id="td-tag1">全身按摩</span>
+        <span class="tag" id="td-tag2">泰式</span>
+        <span class="tag" id="td-tag3">精油</span>
+        <span class="tag" id="td-tag4">3年資歷</span>
+      </div>
+    </div>
+    <div class="th-detail-section">
+      <h4 id="td-svc-title">服務項目</h4>
+      <div class="detail-svc-item" onclick="goPage('page-book')">
+        <div><div class="dsv-name" id="td-svc1">寮式傳統按摩</div><div class="dsv-dur" id="td-svc1dur">60分鐘</div></div>
+        <div class="dsv-price">₭150,000</div>
+      </div>
+      <div class="detail-svc-item" onclick="goPage('page-book')">
+        <div><div class="dsv-name" id="td-svc2">泰式按摩</div><div class="dsv-dur" id="td-svc2dur">60分鐘</div></div>
+        <div class="dsv-price">₭130,000</div>
+      </div>
+      <div class="detail-svc-item" onclick="goPage('page-book')">
+        <div><div class="dsv-name" id="td-svc3">精油按摩</div><div class="dsv-dur" id="td-svc3dur">60分鐘</div></div>
+        <div class="dsv-price">₭150,000</div>
+      </div>
+    </div>
+    <div class="th-detail-section">
+      <h4 id="td-about-title">關於我</h4>
+      <p class="about-text" id="td-about-text">擁有3年專業按摩經驗，精通老撾傳統手法與精油SPA。曾在萬象多家知名按摩店工作，熟悉各類客戶需求。服務細心、手法專業，致力於為您帶來最舒適的放鬆體驗。</p>
+    </div>
+    <div class="th-detail-section">
+      <h4 id="td-shop-title">所屬店家</h4>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border-radius:10px;">
+        <span style="font-size:28px;">🏪</span>
+        <div><div style="font-weight:700;font-size:14px;" id="td-shop-name">Vientiane Relax Center</div><div style="font-size:12px;color:var(--text-s);" id="td-shop-sub">6名技師 · 評分 4.7</div></div>
+      </div>
+    </div>
+    <button class="detail-book-btn" onclick="goPage('page-book')" id="td-book-btn">立即預約</button>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 10: SERVICE LIST
+════════════════════════════════════════════════════ -->
+<div id="page-services" class="page">
+  <div class="sub-header">
+    <button class="back-btn" onclick="goPage('page-home')">←</button>
+    <span id="svclist-title">全部服務</span>
+  </div>
+  <div class="filter-tabs" id="svc-filter-tabs">
+    <div class="filter-tab on" onclick="filterSvcTab(this,'all')" id="ft-all">全部</div>
+    <div class="filter-tab" onclick="filterSvcTab(this,'lao')" id="ft-lao">寮式按摩</div>
+    <div class="filter-tab" onclick="filterSvcTab(this,'thai')" id="ft-thai">泰式按摩</div>
+    <div class="filter-tab" onclick="filterSvcTab(this,'oil')" id="ft-oil">精油按摩</div>
+    <div class="filter-tab" onclick="filterSvcTab(this,'foot')" id="ft-foot">腳底按摩</div>
+    <div class="filter-tab" onclick="filterSvcTab(this,'neck')" id="ft-neck">頭頸肩背</div>
+  </div>
+  <div class="sub-page-content" id="svc-list-content">
+    <div class="svc-card" onclick="goPage('page-book')" data-cat="lao">
+      <div class="svc-icon" style="background:#FFF0EB;">🤲</div>
+      <div class="svc-info">
+        <div class="svc-name" id="svc1-name">寮式傳統按摩</div>
+        <div class="svc-desc" id="svc1-desc">老撾傳統手法，舒筋活絡</div>
+        <div class="svc-price" id="svc1-price">60分鐘 · <b>₭150,000</b>起</div>
+      </div>
+      <div class="svc-arrow">›</div>
+    </div>
+    <div class="svc-card" onclick="goPage('page-book')" data-cat="lao">
+      <div class="svc-icon" style="background:#FFF0EB;">🤲</div>
+      <div class="svc-info">
+        <div class="svc-name" id="svc1b-name">寮式傳統按摩</div>
+        <div class="svc-desc" id="svc1b-desc">深度放鬆，消除全身疲勞</div>
+        <div class="svc-price" id="svc1b-price">90分鐘 · <b>₭220,000</b></div>
+      </div>
+      <div class="svc-arrow">›</div>
+    </div>
+    <div class="svc-card" onclick="goPage('page-book')" data-cat="thai">
+      <div class="svc-icon" style="background:#F0F4FF;">🙏</div>
+      <div class="svc-info">
+        <div class="svc-name" id="svc2-name">泰式按摩</div>
+        <div class="svc-desc" id="svc2-desc">傳統泰式伸展，活絡筋骨</div>
+        <div class="svc-price" id="svc2-price">60分鐘 · <b>₭130,000</b>起</div>
+      </div>
+      <div class="svc-arrow">›</div>
+    </div>
+    <div class="svc-card" onclick="goPage('page-book')" data-cat="thai">
+      <div class="svc-icon" style="background:#F0F4FF;">🙏</div>
+      <div class="svc-info">
+        <div class="svc-name" id="svc2b-name">泰式按摩</div>
+        <div class="svc-desc" id="svc2b-desc">深度泰式按壓，恢復柔韌性</div>
+        <div class="svc-price" id="svc2b-price">90分鐘 · <b>₭200,000</b></div>
+      </div>
+      <div class="svc-arrow">›</div>
+    </div>
+    <div class="svc-card" onclick="goPage('page-book')" data-cat="oil">
+      <div class="svc-icon" style="background:#F0FFF4;">🌿</div>
+      <div class="svc-info">
+        <div class="svc-name" id="svc3-name">精油按摩</div>
+        <div class="svc-desc" id="svc3-desc">天然香薰精油，滋潤肌膚放鬆</div>
+        <div class="svc-price" id="svc3-price">60分鐘 · <b>₭150,000</b></div>
+      </div>
+      <div class="svc-arrow">›</div>
+    </div>
+    <div class="svc-card" onclick="goPage('page-book')" data-cat="foot">
+      <div class="svc-icon" style="background:#FFF8E1;">🦶</div>
+      <div class="svc-info">
+        <div class="svc-name" id="svc4-name">腳底按摩</div>
+        <div class="svc-desc" id="svc4-desc">刺激足部穴位，緩解腿部疲勞</div>
+        <div class="svc-price" id="svc4-price">60分鐘 · <b>₭80,000</b></div>
+      </div>
+      <div class="svc-arrow">›</div>
+    </div>
+    <div class="svc-card" onclick="goPage('page-book')" data-cat="neck">
+      <div class="svc-icon" style="background:#F5E6FF;">💆</div>
+      <div class="svc-info">
+        <div class="svc-name" id="svc5-name">頭頸肩背按摩</div>
+        <div class="svc-desc" id="svc5-desc">針對辦公族，解除頸肩酸痛</div>
+        <div class="svc-price" id="svc5-price">45分鐘 · <b>₭90,000</b></div>
+      </div>
+      <div class="svc-arrow">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 11: REVIEW
+════════════════════════════════════════════════════ -->
+<div id="page-review" class="page">
+  <div class="sub-header">
+    <button class="back-btn" onclick="goPage('page-orders')">←</button>
+    <span id="review-title">撰寫評價</span>
+  </div>
+  <div class="sub-page-content">
+    <div class="review-section">
+      <div class="rs-title" id="review-rs-title">全身按摩 60分鐘</div>
+      <div class="rs-sub" id="review-rs-sub">Nana · 娜娜 · 2026-06-22</div>
+      <div class="star-row" id="review-stars">
+        <span class="star" onclick="setReviewStar(0)">☆</span>
+        <span class="star" onclick="setReviewStar(1)">☆</span>
+        <span class="star" onclick="setReviewStar(2)">☆</span>
+        <span class="star" onclick="setReviewStar(3)">☆</span>
+        <span class="star" onclick="setReviewStar(4)">☆</span>
+      </div>
+    </div>
+    <textarea class="review-textarea" id="review-text" placeholder="分享你的體驗..."></textarea>
+    <button class="submit-review-btn" onclick="showToast('評價已提交！')" id="review-submit">提交評價</button>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 12: COUPONS
+════════════════════════════════════════════════════ -->
+<div id="page-coupon" class="page">
+  <div class="sub-header">
+    <button class="back-btn" onclick="goPage('page-profile')">←</button>
+    <span id="coupon-title">優惠券</span>
+  </div>
+  <div class="sub-page-content">
+    <div class="coupon-card">
+      <span class="cp-tag" id="cp-tag1">可使用</span>
+      <div class="cp-amount" id="cp-amount1">₭30,000</div>
+      <div class="cp-desc" id="cp-desc1">首次預約滿 ₭100,000 可用</div>
+      <div class="cp-expire" id="cp-expire1">有效期至 2026-07-22</div>
+    </div>
+    <div class="coupon-card">
+      <span class="cp-tag" id="cp-tag2">可使用</span>
+      <div class="cp-amount" id="cp-amount2">₭20,000</div>
+      <div class="cp-desc" id="cp-desc2">泰式按摩專用 · 滿 ₭100,000</div>
+      <div class="cp-expire" id="cp-expire2">有效期至 2026-07-15</div>
+    </div>
+    <div class="coupon-card used">
+      <span class="cp-tag" id="cp-tag3">已使用</span>
+      <div class="cp-amount" id="cp-amount3">₭15,000</div>
+      <div class="cp-desc" id="cp-desc3">滿 ₭150,000 可用</div>
+      <div class="cp-expire" id="cp-expire3">已於 2026-06-10 使用</div>
+    </div>
+    <div class="coupon-card used">
+      <span class="cp-tag" id="cp-tag4">已過期</span>
+      <div class="cp-amount" id="cp-amount4">₭50,000</div>
+      <div class="cp-desc" id="cp-desc4">開城活動 · 滿 ₭200,000 可用</div>
+      <div class="cp-expire" id="cp-expire4">已過期 · 2026-05-31</div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 13: ADDRESS
+════════════════════════════════════════════════════ -->
+<div id="page-address" class="page">
+  <div class="sub-header">
+    <button class="back-btn" onclick="goPage('page-profile')">←</button>
+    <span id="addr-title">我的地址</span>
+  </div>
+  <div class="sub-page-content">
+    <div class="addr-card">
+      <span class="addr-tag default" id="addr-tag1">預設</span>
+      <div><span class="addr-name" id="addr-name1">李小姐</span><span class="addr-phone">+856 20 1234 5678</span></div>
+      <div class="addr-text" id="addr-text1">Ban Dong Rd, Xaysettha District, Vientiane<br>近萬象中心市場</div>
+      <div class="addr-actions">
+        <button class="addr-edit" onclick="showToast('編輯地址')">✏️ 編輯</button>
+        <button class="addr-del" onclick="showToast('已刪除')" style="display:none;">🗑 刪除</button>
+      </div>
+    </div>
+    <div class="addr-card">
+      <div><span class="addr-name" id="addr-name2">辦公室</span><span class="addr-phone">+856 20 5678 9012</span></div>
+      <div class="addr-text" id="addr-text2">Sisattanak Rd, Vientiane<br>Vientiane Tower 5F</div>
+      <div class="addr-actions">
+        <button class="addr-edit" onclick="showToast('編輯地址')">✏️ 編輯</button>
+        <button class="addr-del" onclick="showToast('已刪除')">🗑 刪除</button>
+      </div>
+    </div>
+    <button class="addr-new-btn" onclick="showToast('新增地址')" id="addr-add-btn">＋ 新增地址</button>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 14: FAVORITES
+════════════════════════════════════════════════════ -->
+<div id="page-favorites" class="page">
+  <div class="sub-header">
+    <button class="back-btn" onclick="goPage('page-profile')">←</button>
+    <span id="fav-title">收藏技師</span>
+  </div>
+  <div class="sub-page-content">
+    <div class="fav-empty" id="fav-empty">
+      <div class="fe-icon">⭐</div>
+      <div class="fe-text" id="fav-empty-text">還沒有收藏任何技師</div>
+      <div style="font-size:12px;color:#bbb;margin-top:4px;" id="fav-empty-sub">去首頁瀏覽並收藏喜歡的技師吧</div>
+    </div>
+    <!-- When not empty:
+    <div class="therapist-card" onclick="goPage('page-tdetail')">...</div>
+    -->
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 15: SUPPORT
+════════════════════════════════════════════════════ -->
+<div id="page-support" class="page">
+  <div class="sub-header">
+    <button class="back-btn" onclick="goPage('page-profile')">←</button>
+    <span id="support-title">客服支援</span>
+  </div>
+  <div class="sub-page-content">
+    <div style="padding-top:8px;">
+      <div class="support-item" onclick="showToast('線上客服')">
+        <div class="si-icon" style="background:#FFF0EB;">💬</div>
+        <div class="si-label" id="sp-online">在線客服</div>
+        <div class="si-arrow">›</div>
+      </div>
+      <div class="support-item" onclick="showToast('常見問題')">
+        <div class="si-icon" style="background:#F0F4FF;">❓</div>
+        <div class="si-label" id="sp-faq">常見問題</div>
+        <div class="si-arrow">›</div>
+      </div>
+      <div class="support-item" onclick="showToast('訂單協助')">
+        <div class="si-icon" style="background:#F0FFF4;">📋</div>
+        <div class="si-label" id="sp-order">訂單協助</div>
+        <div class="si-arrow">›</div>
+      </div>
+      <div class="support-item" onclick="showToast('退款協助')">
+        <div class="si-icon" style="background:#FFF8E1;">💰</div>
+        <div class="si-label" id="sp-refund">退款協助</div>
+        <div class="si-arrow">›</div>
+      </div>
+      <div class="support-item" onclick="showToast('意見回饋')">
+        <div class="si-icon" style="background:#F5E6FF;">📝</div>
+        <div class="si-label" id="sp-feedback">意見回饋</div>
+        <div class="si-arrow">›</div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:24px 16px;color:var(--text-xs);font-size:12px;" id="sp-contact">
+      客服熱線：+856 21 555 888<br>服務時間：08:00 - 22:00
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 16: SETTINGS
+════════════════════════════════════════════════════ -->
+<div id="page-settings" class="page">
+  <div class="sub-header">
+    <button class="back-btn" onclick="goPage('page-profile')">←</button>
+    <span id="settings-title">設定</span>
+  </div>
+  <div class="sub-page-content">
+    <div class="set-section">
+      <div class="set-item">
+        <div class="si-left"><span style="font-size:18px;">🔔</span><span class="si-label" id="set-notify">通知設定</span></div>
+        <span class="si-arrow-s">›</span>
+      </div>
+      <div class="set-item">
+        <div class="si-left"><span style="font-size:18px;">🌐</span><span class="si-label" id="set-lang">語言</span></div>
+        <span class="si-val" id="set-lang-val">中文</span>
+      </div>
+    </div>
+    <div class="set-section">
+      <div class="set-item">
+        <div class="si-left"><span style="font-size:18px;">🔒</span><span class="si-label" id="set-privacy">隱私設定</span></div>
+        <span class="si-arrow-s">›</span>
+      </div>
+      <div class="set-item">
+        <div class="si-left"><span style="font-size:18px;">📱</span><span class="si-label" id="set-cache">清除緩存</span></div>
+        <span class="si-val">12.5 MB</span>
+      </div>
+    </div>
+    <div class="set-section">
+      <div class="set-item">
+        <div class="si-left"><span style="font-size:18px;">ℹ️</span><span class="si-label" id="set-about">關於我們</span></div>
+        <span class="si-arrow-s">›</span>
+      </div>
+      <div class="set-item">
+        <div class="si-left"><span style="font-size:18px;">👋</span><span class="si-label" id="set-logout">退出登入</span></div>
+        <span class="si-arrow-s">›</span>
+      </div>
+    </div>
+    <div style="text-align:center;padding:24px;color:var(--text-xs);font-size:11px;">舒摩到家 v1.0.0</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 17: THERAPIST ORDER HISTORY
+════════════════════════════════════════════════════ -->
+<div id="page-th-orders" class="page">
+  <div class="sub-header" style="background:linear-gradient(135deg,#0D1B2A,#2D5F8A);">
+    <button class="back-btn" onclick="goPage('page-therapist')">←</button>
+    <span id="th-orders-title">訂單記錄</span>
+  </div>
+  <div class="filter-tabs">
+    <div class="filter-tab on" onclick="showToast('全部')" id="tho-all">全部</div>
+    <div class="filter-tab" onclick="showToast('已完成')" id="tho-done">已完成</div>
+    <div class="filter-tab" onclick="showToast('已取消')" id="tho-cancel">已取消</div>
+  </div>
+  <div class="sub-page-content">
+    <div class="earning-card">
+      <div class="ec-icon">🤲</div>
+      <div class="ec-info">
+        <div class="ec-date">2026-06-22 14:00</div>
+        <div class="ec-service" id="tho-s1">全身按摩 60分鐘</div>
+      </div>
+      <div class="ec-amount">₭150,000</div>
+    </div>
+    <div class="earning-card">
+      <div class="ec-icon">🙏</div>
+      <div class="ec-info">
+        <div class="ec-date">2026-06-18 10:00</div>
+        <div class="ec-service" id="tho-s2">泰式按摩 60分鐘</div>
+      </div>
+      <div class="ec-amount">₭130,000</div>
+    </div>
+    <div class="earning-card">
+      <div class="ec-icon">🌿</div>
+      <div class="ec-info">
+        <div class="ec-date">2026-06-15 15:30</div>
+        <div class="ec-service" id="tho-s3">精油按摩 60分鐘</div>
+      </div>
+      <div class="ec-amount">₭150,000</div>
+    </div>
+    <div class="earning-card" style="opacity:0.6;">
+      <div class="ec-icon" style="background:#FEE2E2;">❌</div>
+      <div class="ec-info">
+        <div class="ec-date">2026-06-12 11:00</div>
+        <div class="ec-service" id="tho-s4">腳底按摩 60分鐘</div>
+      </div>
+      <div class="ec-amount" style="color:#999;">已取消</div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 18: THERAPIST EARNINGS
+════════════════════════════════════════════════════ -->
+<div id="page-th-earnings" class="page">
+  <div class="sub-header" style="background:linear-gradient(135deg,#0D1B2A,#2D5F8A);">
+    <button class="back-btn" onclick="goPage('page-therapist')">←</button>
+    <span id="th-earn-title">收入明細</span>
+  </div>
+  <div class="sub-page-content">
+    <div class="earning-summary">
+      <div class="es-row">
+        <div class="es-item">
+          <div class="es-val">₭430,000</div>
+          <div class="es-lbl" id="earn-month">本月收入</div>
+        </div>
+        <div class="es-item">
+          <div class="es-val">₭64,500</div>
+          <div class="es-lbl" id="earn-fee">已繳手續費</div>
+        </div>
+        <div class="es-item">
+          <div class="es-val">₭365,500</div>
+          <div class="es-lbl" id="earn-net">淨收入</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-around;padding:12px 0 0;border-top:1px solid rgba(255,255,255,0.1);">
+        <div class="es-item">
+          <div class="es-val">9</div>
+          <div class="es-lbl" id="earn-orders">完成訂單</div>
+        </div>
+        <div class="es-item">
+          <div class="es-val">4.9</div>
+          <div class="es-lbl" id="earn-rating">平均評分</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-title-sm" id="earn-recent">近期收入</div>
+    <div class="earning-card">
+      <div class="ec-icon">💰</div>
+      <div class="ec-info">
+        <div class="ec-date">2026-06-22</div>
+        <div class="ec-service" id="earn-s1">全身按摩 · 李小姐</div>
+      </div>
+      <div class="ec-amount">₭150,000</div>
+    </div>
+    <div class="earning-card">
+      <div class="ec-icon">💰</div>
+      <div class="ec-info">
+        <div class="ec-date">2026-06-18</div>
+        <div class="ec-service" id="earn-s2">泰式按摩 · 陳先生</div>
+      </div>
+      <div class="ec-amount">₭130,000</div>
+    </div>
+    <div class="earning-card">
+      <div class="ec-icon">💸</div>
+      <div class="ec-info">
+        <div class="ec-date">2026-06-15</div>
+        <div class="ec-service" id="earn-s3">手續費扣繳</div>
+      </div>
+      <div class="ec-amount" style="color:#EF4444;">-₭22,500</div>
+    </div>
+    <div class="earning-card">
+      <div class="ec-icon">💰</div>
+      <div class="ec-info">
+        <div class="ec-date">2026-06-15</div>
+        <div class="ec-service" id="earn-s4">精油按摩 · 張太太</div>
+      </div>
+      <div class="ec-amount">₭150,000</div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 19: ADMIN ORDER MANAGEMENT
+════════════════════════════════════════════════════ -->
+<div id="page-admin-orders" class="page">
+  <div class="admin-sub-header">
+    <button class="back-btn" onclick="goPage('page-admin')">←</button>
+    <span id="ao-title">全部訂單</span>
+  </div>
+  <div class="filter-tabs">
+    <div class="filter-tab on" onclick="showToast('全部')" id="ao-all">全部</div>
+    <div class="filter-tab" onclick="showToast('進行中')" id="ao-ongoing">進行中</div>
+    <div class="filter-tab" onclick="showToast('已完成')" id="ao-done">已完成</div>
+    <div class="filter-tab" onclick="showToast('待審核')" id="ao-pending">待審核</div>
+  </div>
+  <div class="sub-page-content">
+    <div class="admin-order-card">
+      <div class="aoc-left">
+        <div class="aoc-id">#VM240622</div>
+        <div class="aoc-service" id="ao-s1">全身按摩 60分鐘</div>
+        <div class="aoc-meta" id="ao-m1">李小姐 · Nana · 06-22 14:00</div>
+        <span class="aoc-status aoc-ongoing" id="ao-st1">進行中</span>
+      </div>
+      <div class="aoc-amount">₭150,000</div>
+    </div>
+    <div class="admin-order-card">
+      <div class="aoc-left">
+        <div class="aoc-id">#VM240621</div>
+        <div class="aoc-service" id="ao-s2">泰式按摩 60分鐘</div>
+        <div class="aoc-meta" id="ao-m2">陳先生 · Khamphet · 06-21 10:00</div>
+        <span class="aoc-status aoc-done" id="ao-st2">已完成</span>
+      </div>
+      <div class="aoc-amount">₭130,000</div>
+    </div>
+    <div class="admin-order-card">
+      <div class="aoc-left">
+        <div class="aoc-id">#VM240620</div>
+        <div class="aoc-service" id="ao-s3">精油按摩 60分鐘</div>
+        <div class="aoc-meta" id="ao-m3">張太太 · Souphavanh · 06-20 15:30</div>
+        <span class="aoc-status aoc-done" id="ao-st3">已完成</span>
+      </div>
+      <div class="aoc-amount">₭150,000</div>
+    </div>
+    <div class="admin-order-card">
+      <div class="aoc-left">
+        <div class="aoc-id">#VM240619</div>
+        <div class="aoc-service" id="ao-s4">頭頸肩背 45分鐘</div>
+        <div class="aoc-meta" id="ao-m4">王小姐 · Nana · 06-19 16:00</div>
+        <span class="aoc-status aoc-done" id="ao-st4">已完成</span>
+      </div>
+      <div class="aoc-amount">₭90,000</div>
+    </div>
+    <div class="admin-order-card">
+      <div class="aoc-left">
+        <div class="aoc-id">#VM240618</div>
+        <div class="aoc-service" id="ao-s5">腳底按摩 60分鐘</div>
+        <div class="aoc-meta" id="ao-m5">趙先生 · Khamphet · 06-18 11:00</div>
+        <span class="aoc-status aoc-pending" id="ao-st5">待審核</span>
+      </div>
+      <div class="aoc-amount">₭80,000</div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 20: ADMIN THERAPIST MANAGEMENT
+════════════════════════════════════════════════════ -->
+<div id="page-admin-therapists" class="page">
+  <div class="admin-sub-header">
+    <button class="back-btn" onclick="goPage('page-admin')">←</button>
+    <span id="at-title">技師管理</span>
+    <span style="margin-left:auto;font-size:12px;font-weight:600;cursor:pointer;" onclick="showToast('新增技師')" id="at-add">＋ 新增</span>
+  </div>
+  <div class="filter-tabs">
+    <div class="filter-tab on" onclick="showToast('全部')" id="at-all">全部 (12)</div>
+    <div class="filter-tab" onclick="showToast('在線')" id="at-online">在線 (5)</div>
+    <div class="filter-tab" onclick="showToast('離線')" id="at-offline">離線 (4)</div>
+    <div class="filter-tab" onclick="showToast('審核中')" id="at-review">審核中 (3)</div>
+  </div>
+  <div class="sub-page-content">
+    <div class="admin-th-card" onclick="goPage('page-therapist')">
+      <div class="atc-avatar">💆‍♀️</div>
+      <div class="atc-info">
+        <div class="atc-name">Nana · 娜娜</div>
+        <div class="atc-shop">Vientiane Relax Center · 4.9★</div>
+      </div>
+      <span class="atc-status atc-online" id="at-st1">在線</span>
+    </div>
+    <div class="admin-th-card">
+      <div class="atc-avatar">💆</div>
+      <div class="atc-info">
+        <div class="atc-name">Khamphet · 坎佩特</div>
+        <div class="atc-shop">Lao Wellness Spa · 4.8★</div>
+      </div>
+      <span class="atc-status atc-busy" id="at-st2">服務中</span>
+    </div>
+    <div class="admin-th-card">
+      <div class="atc-avatar">🧖‍♀️</div>
+      <div class="atc-info">
+        <div class="atc-name">Souphavanh · 蘇法旺</div>
+        <div class="atc-shop">Mekong Therapy House · 4.7★</div>
+      </div>
+      <span class="atc-status atc-offline" id="at-st3">離線</span>
+    </div>
+    <div class="admin-th-card">
+      <div class="atc-avatar">🧘</div>
+      <div class="atc-info">
+        <div class="atc-name">Bounmy · 波米</div>
+        <div class="atc-shop">Vientiane Relax Center · 4.6★</div>
+      </div>
+      <span class="atc-status atc-online" id="at-st4">在線</span>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════ -->
+<script>
+/* ─── DATA ─── */
+const therapists = [
+  { id:1, name:'Nana · 娜娜', nameEn:'Nana', nameTh:'นานา', emoji:'💆‍♀️', rating:4.9, reviews:280, dist:'1.2km', tags:['全身按摩','泰式','精油'], tagEn:['Full Body','Thai','Oil'], tagTh:['นวดทั้งตัว','นวดไทย','น้ำมัน'], price:'₭150,000', services:['全身按摩 60分鐘','全身按摩 90分鐘','泰式按摩 60分鐘'], available:true },
+  { id:2, name:'Khamphet · 坎佩特', nameEn:'Khamphet', nameTh:'คำเพชร', emoji:'💆', rating:4.8, reviews:195, dist:'2.1km', tags:['泰式','頸肩','運動'], tagEn:['Thai','Neck','Sport'], tagTh:['นวดไทย','คอบ่า','กีฬา'], price:'₭130,000', services:['泰式按摩 60分鐘','頸肩推拿 45分鐘'], available:true },
+  { id:3, name:'Souphavanh · 蘇法旺', nameEn:'Souphavanh', nameTh:'สุภาวัณ', emoji:'🧖‍♀️', rating:4.7, reviews:142, dist:'3.5km', tags:['精油','足部','頭頸'], tagEn:['Oil','Foot','Head'], tagTh:['น้ำมัน','เท้า','หัวไหล่'], price:'₭150,000', services:['精油按摩 60分鐘','腳底按摩 60分鐘'], available:false },
+];
+
+const orders = [
+  { id:'#VM240622', status:'ongoing', statusEn:'Ongoing', statusTh:'กำลังดำเนินการ', service:'全身按摩 60分鐘', serviceEn:'Full Body 60min', serviceTh:'นวดทั้งตัว 60น.', therapist:'Nana · 娜娜', price:'₭150,000', date:'2026-06-22 14:00' },
+  { id:'#VM240618', status:'done', statusEn:'Completed', statusTh:'เสร็จสิ้น', service:'泰式按摩 60分鐘', serviceEn:'Thai Massage 60min', serviceTh:'นวดไทย 60น.', therapist:'Khamphet · 坎佩特', price:'₭130,000', date:'2026-06-18 10:00' },
+  { id:'#VM240610', status:'done', statusEn:'Completed', statusTh:'เสร็จสิ้น', service:'精油SPA 60分鐘', serviceEn:'Oil SPA 60min', serviceTh:'สปาน้ำมัน 60น.', therapist:'Souphavanh · 蘇法旺', price:'₭180,000', date:'2026-06-10 15:00' },
+];
+
+const i18n = {
+  zh: {
+    greet:'晚上好 👋', heroName:'李小姐', catTitle:'服務分類',
+    cat1:'寮式按摩', cat2:'泰式按摩', cat3:'精油按摩', cat4:'腳底按摩', cat5:'頭頸肩背', cat6:'全部服務',
+    nearbyTitle:'附近技師', seeAll:'查看全部',
+    navHome:'首頁', navOrders:'訂單', navProfile:'我的',
+    b1tag:'限時優惠', b1title:'首次體驗\n8折優惠', b1sub:'₭150,000 → <b>₭120,000</b> · 限新用戶',
+    b2tag:'本週推薦', b2title:'泰式按摩\n全城最低價', b2sub:'60分鐘 <b>₭120,000</b> · 傳統手法',
+    b3tag:'會員專屬', b3title:'月卡套餐\n每月4次', b3sub:'<b>₭480,000</b> · 省 ₭120,000',
+    ordersLabel:'次服務', dist:'距離',
+    bkServiceTitle:'選擇服務', bkTimeTitle:'預約時間', bkAddrTitle:'上門地址',
+    bkOrdersLabel:'次服務',
+    s1:'寮式傳統按摩 60分鐘', s1d:'老撾傳統手法，舒筋活絡',
+    s2:'寮式傳統按摩 90分鐘', s2d:'深度放鬆，消除全身疲勞',
+    s3:'泰式按摩 60分鐘', s3d:'傳統泰式伸展，活絡筋骨',
+    s4:'泰式按摩 90分鐘', s4d:'深度泰式按壓，恢復柔韌性',
+    s5:'精油按摩 60分鐘', s5d:'天然香薰精油，滋潤肌膚放鬆',
+    s6:'腳底按摩 60分鐘', s6d:'刺激足部穴位，緩解腿部疲勞',
+    s7:'頭頸肩背 45分鐘', s7d:'針對辦公族，解除頸肩酸痛',
+    tsFull:'已滿',
+    addrPh:'Ban Dong Rd, Xaysettha, Vientiane',
+    cashTitle:'現場現金付款',
+    cashBody:'本平台採用<b>現場現金付款</b>方式，無需線上預付。<br>服務完成後，請直接將費用交給技師。<br>技師完成服務後將向平台繳交手續費。',
+    bfTotalLabel:'現場付款金額', bfFeeLabel:'技師手續費',
+    confirmBtn:'確認預約',
+    ohLabel:'訂單狀態', ohStatus:'技師趕來中',
+    ohTime:'預計到達 14:30 · 約15分鐘',
+    tfcEta:'⚡ 預計15分鐘後到達',
+    crTitle:'請準備現金', crLabel:'全身按摩 60分鐘 · 服務完成後交給技師',
+    progressTitle:'服務進度',
+    odNo:'訂單編號', odService:'服務項目', odAddr:'服務地址', odTime:'預約時間', odAmount:'現金金額',
+    orderDetailTitle:'訂單詳情', orderPageTitle:'我的訂單',
+    ftAll:'全部', ftOngoing:'進行中', ftDone:'已完成', ftCancelled:'已取消',
+    ongoingChip:'進行中', doneChip:'已完成',
+    profileName:'李小姐', psOrders:'次訂單', psRating:'評分', psSpendLabel:'消費',
+    modeSwitchLabel:'切換模式預覽', modeUser:'👤 用戶端', modeTherapist:'💆 技師端', modeAdmin:'⚙️ 後台',
+    menuCoupon:'優惠券', menuCollect:'收藏技師', menuAddress:'我的地址', menuSupport:'客服支援',
+    menuNotify:'通知設定', menuSettings:'設定', logoutBtn:'退出登入',
+    thGreet:'歡迎回來', thStat1:'今日收入', thStat2:'今日訂單', thStat3:'待繳手續費',
+    toggleLabel:'接單狀態', toggleOnSub:'● 接單中', toggleOffSub:'○ 休息中',
+    faTitle:'手續費待繳', faBtn:'立即繳交 →',
+    faBody:'您有1筆訂單的平台手續費尚未繳交。<b>繳清後方可接受新訂單。</b><br>待繳金額：<b>₭22,500</b>',
+    thOrdersTitle:'待處理訂單', ocNewChip:'新訂單', ocDoneChip:'服務中',
+    ocService:'全身按摩 60分鐘', ocClient:'客戶：李小姐',
+    ocCashLabel:'客戶付現', ocFeeLabel:'平台手續費',
+    ocReject:'拒絕', ocAccept:'接受', ocComplete:'完成並繳費',
+    ocService2:'泰式按摩 60分鐘', ocClient2:'客戶：陳先生', ocCashLabel2:'客戶付現',
+    thProfileBtn:'查看技師資料 ›',
+    feePageTitle:'手續費繳交', feeWarning:'手續費未繳清前，您無法接受新訂單',
+    feeOrderTitle:'訂單摘要', foServiceL:'服務項目', foAmountL:'客戶付現', foRateL:'手續費率',
+    foTotalL:'應繳手續費', fhLabel:'請轉帳此金額至公司帳戶',
+    feeBankTitle:'收款帳戶', biBank:'銀行', biAccount:'帳號', biNameL:'戶名', biRef:'轉帳備注',
+    feeUploadTitle:'上傳轉帳憑證', ubText:'點擊上傳截圖', ubSub:'支援 JPG / PNG，最大 10MB',
+    feeSubmitWarning:'請確認已轉帳後再提交', submitFeeBtn:'提交繳費憑證',
+    adminTitle:'管理後台', adminSub:'Vientiane Wellness Co., Ltd', adminExportBtn:'導出報表',
+    asGmv:'本月 GMV', asIncome:'平台收入', asOrders:'本月訂單', asOnline:'在線技師',
+    feeReviewTitle:'手續費審核', chipReview:'待審核', chipPending:'未繳交', chipPaid:'已入帳',
+    feeRateTitle:'手續費費率設定',
+    rate1:'寮式按摩', rate2:'泰式按摩', rate3:'精油按摩',
+    partnerTitle:'合作按摩店',
+    shop1Sub:'6名技師 · 今日5人在線', shop2Sub:'4名技師 · 今日4人在線', shop3Sub:'3名技師 · 審核中',
+    sActive:'營業中', sPending:'審核中',
+    backHomeBtn:'← 返回首頁', adminBackBtn:'← 返回個人中心',
+    steps: ['訂單確認', '技師前往', '服務進行中', '服務完成'],
+    stepsTimes: ['14:00','14:05','',''],
+    stepsDescs: ['您的預約已確認', '技師正在前往您的地址', '預計到達後開始服務', '服務完成，請付現金'],
+    // Therapist Profile
+    tpTitle:'技師資料', tpRole:'資深按摩技師', tpReviews:'(280 則評價)',
+    tpSOrders:'已完成訂單', tpSExp:'服務年資', tpSRate:'好評率',
+    tpSvcTitle:'提供服務', tpAboutTitle:'關於我',
+    tpAboutText:'擁有 3 年專業按摩經驗，擅長寮式傳統手法與精油 SPA。曾在萬象多家知名按摩店服務，熟悉各種客戶需求。服務細心、手法專業，致力於為每位客戶帶來最舒適的放鬆體驗。',
+    tpSchTitle:'服務時間', tpSchDay1:'週一至週五', tpSchDay2:'週六至週日',
+    tpShopTitle:'合作店家', tpShopName:'Vientiane Wellness 按摩中心', tpShopAddr:'Sisattanak, Vientiane · 12 位技師',
+    tpCertTitle:'專業認證', tpCert1:'寮式傳統按摩認證', tpCert2:'泰式按摩 Lv.2', tpCert3:'芳香精油 SPA 證書',
+    tpEdit:'編輯資料',
+
+    // --- New sub-page i18n ---
+    tdetailTitle:'技師詳情', tdReviews:'280 評價', tdDist:'1.2km',
+    tdTag1:'全身按摩', tdTag2:'泰式', tdTag3:'精油', tdTag4:'3年資歷',
+    tdSvcTitle:'服務項目', tdSvc1:'寮式傳統按摩', tdSvc1dur:'60分鐘',
+    tdSvc2:'泰式按摩', tdSvc2dur:'60分鐘', tdSvc3:'精油按摩', tdSvc3dur:'60分鐘',
+    tdAboutTitle:'關於我', tdAboutText:'擁有3年專業按摩經驗，精通老撾傳統手法與精油SPA。曾在萬象多家知名按摩店工作，熟悉各類客戶需求。服務細心、手法專業，致力於為您帶來最舒適的放鬆體驗。',
+    tdShopTitle:'所屬店家', tdShopName:'Vientiane Relax Center', tdShopSub:'6名技師 · 評分 4.7',
+    tdBookBtn:'立即預約',
+    svclistTitle:'全部服務', ftAll:'全部', ftLao:'寮式按摩', ftThai:'泰式按摩', ftOil:'精油按摩', ftFoot:'腳底按摩', ftNeck:'頭頸肩背',
+    svc1Name:'寮式傳統按摩', svc1Desc:'老撾傳統手法，舒筋活絡', svc1Price:'60分鐘 · <b>₭150,000</b>起',
+    svc1bName:'寮式傳統按摩', svc1bDesc:'深度放鬆，消除全身疲勞', svc1bPrice:'90分鐘 · <b>₭220,000</b>',
+    svc2Name:'泰式按摩', svc2Desc:'傳統泰式伸展，活絡筋骨', svc2Price:'60分鐘 · <b>₭130,000</b>起',
+    svc2bName:'泰式按摩', svc2bDesc:'深度泰式按壓，恢復柔韌性', svc2bPrice:'90分鐘 · <b>₭200,000</b>',
+    svc3Name:'精油按摩', svc3Desc:'天然香薰精油，滋潤肌膚放鬆', svc3Price:'60分鐘 · <b>₭150,000</b>',
+    svc4Name:'腳底按摩', svc4Desc:'刺激足部穴位，緩解腿部疲勞', svc4Price:'60分鐘 · <b>₭80,000</b>',
+    svc5Name:'頭頸肩背按摩', svc5Desc:'針對辦公族，解除頸肩酸痛', svc5Price:'45分鐘 · <b>₭90,000</b>',
+    reviewTitle:'撰寫評價', reviewRsTitle:'全身按摩 60分鐘', reviewRsSub:'Nana · 娜娜 · 2026-06-22', reviewPlaceholder:'分享你的體驗...', reviewSubmit:'提交評價',
+    couponTitle:'優惠券', cpTag1:'可使用', cpAmount1:'₭30,000', cpDesc1:'首次預約滿 ₭100,000 可用', cpExpire1:'有效期至 2026-07-22',
+    cpTag2:'可使用', cpAmount2:'₭20,000', cpDesc2:'泰式按摩專用 · 滿 ₭100,000', cpExpire2:'有效期至 2026-07-15',
+    cpTag3:'已使用', cpAmount3:'₭15,000', cpDesc3:'滿 ₭150,000 可用', cpExpire3:'已於 2026-06-10 使用',
+    cpTag4:'已過期', cpAmount4:'₭50,000', cpDesc4:'開城活動 · 滿 ₭200,000 可用', cpExpire4:'已過期 · 2026-05-31',
+    addrTitle:'我的地址', addrTag1:'預設', addrName1:'李小姐', addrText1:'Ban Dong Rd, Xaysettha District, Vientiane<br>近萬象中心市場',
+    addrName2:'辦公室', addrText2:'Sisattanak Rd, Vientiane<br>Vientiane Tower 5F', addrAddBtn:'＋ 新增地址',
+    favTitle:'收藏技師', favEmptyText:'還沒有收藏任何技師', favEmptySub:'去首頁瀏覽並收藏喜歡的技師吧',
+    supportTitle:'客服支援', spOnline:'在線客服', spFaq:'常見問題', spOrder:'訂單協助', spRefund:'退款協助', spFeedback:'意見回饋',
+    spContact:'客服熱線：+856 21 555 888<br>服務時間：08:00 - 22:00',
+    settingsTitle:'設定', setNotify:'通知設定', setLang:'語言', setLangVal:'中文', setPrivacy:'隱私設定', setCache:'清除緩存', setAbout:'關於我們', setLogout:'退出登入',
+    thOrdersTitle:'訂單記錄', thoAll:'全部', thoDone:'已完成', thoCancel:'已取消',
+    thoS1:'全身按摩 60分鐘', thoS2:'泰式按摩 60分鐘', thoS3:'精油按摩 60分鐘', thoS4:'腳底按摩 60分鐘',
+    thEarnTitle:'收入明細', earnMonth:'本月收入', earnFee:'已繳手續費', earnNet:'淨收入', earnOrders:'完成訂單', earnRating:'平均評分', earnRecent:'近期收入',
+    earnS1:'全身按摩 · 李小姐', earnS2:'泰式按摩 · 陳先生', earnS3:'手續費扣繳', earnS4:'精油按摩 · 張太太',
+    aoTitle:'全部訂單', aoAllL:'全部', aoOngoing:'進行中', aoDone:'已完成', aoPending:'待審核',
+    aoS1:'全身按摩 60分鐘', aoM1:'李小姐 · Nana · 06-22 14:00', aoSt1:'進行中',
+    aoS2:'泰式按摩 60分鐘', aoM2:'陳先生 · Khamphet · 06-21 10:00', aoSt2:'已完成',
+    aoS3:'精油按摩 60分鐘', aoM3:'張太太 · Souphavanh · 06-20 15:30', aoSt3:'已完成',
+    aoS4:'頭頸肩背 45分鐘', aoM4:'王小姐 · Nana · 06-19 16:00', aoSt4:'已完成',
+    aoS5:'腳底按摩 60分鐘', aoM5:'趙先生 · Khamphet · 06-18 11:00', aoSt5:'待審核',
+    atTitle:'技師管理', atAdd:'＋ 新增', atAllL:'全部 (12)', atOnlineL:'在線 (5)', atOfflineL:'離線 (4)', atReviewL:'審核中 (3)',
+    atSt1:'在線', atSt2:'服務中', atSt3:'離線', atSt4:'在線',
+    alOrdersBtn:'📋 全部訂單', alTherapistsBtn:'💆 技師管理',
+    thlOrdersBtn:'📋 訂單記錄', thlEarnBtn:'💰 收入明細',
+  },
+  },
+  en: {
+    greet:'Good Evening 👋', heroName:'Ms. Lee', catTitle:'Services',
+    cat1:'Lao Massage', cat2:'Thai Massage', cat3:'Oil Massage', cat4:'Foot Massage', cat5:'Neck & Shoulder', cat6:'All',
+    nearbyTitle:'Nearby Therapists', seeAll:'View All',
+    navHome:'Home', navOrders:'Orders', navProfile:'Profile',
+    b1tag:'Limited Offer', b1title:'First Try\n20% Off', b1sub:'₭150,000 → <b>₭120,000</b> · New users',
+    b2tag:'Weekly Pick', b2title:'Thai Massage\nBest Price', b2sub:'60min <b>₭120,000</b> · Traditional',
+    b3tag:'Member Only', b3title:'Monthly Plan\n4 Sessions', b3sub:'<b>₭480,000</b> · Save ₭120,000',
+    ordersLabel:'Services', dist:'Away',
+    bkServiceTitle:'Select Service', bkTimeTitle:'Select Time', bkAddrTitle:'Service Address',
+    bkOrdersLabel:'services',
+    s1:'Lao Traditional 60min', s1d:'Traditional Lao techniques, muscle relief',
+    s2:'Lao Traditional 90min', s2d:'Deep relaxation, full body care',
+    s3:'Thai Massage 60min', s3d:'Traditional Thai stretching',
+    s4:'Thai Massage 90min', s4d:'Deep Thai pressure, restore flexibility',
+    s5:'Oil Massage 60min', s5d:'Natural aromatherapy, nourish skin',
+    s6:'Foot Massage 60min', s6d:'Acupressure, relieve leg fatigue',
+    s7:'Neck & Shoulder 45min', s7d:'For office workers, relieve stiffness',
+    tsFull:'Full',
+    addrPh:'Ban Dong Rd, Xaysettha, Vientiane',
+    cashTitle:'Cash Payment',
+    cashBody:'This platform uses <b>cash on delivery</b>, no online prepayment.<br>Please pay the therapist directly after service.<br>The therapist will pay the platform fee afterwards.',
+    bfTotalLabel:'Cash Payment', bfFeeLabel:'Platform Fee',
+    confirmBtn:'Confirm Booking',
+    ohLabel:'Order Status', ohStatus:'Therapist on the way',
+    ohTime:'ETA 14:30 · ~15 minutes',
+    tfcEta:'⚡ Arriving in ~15 min',
+    crTitle:'Prepare Cash', crLabel:'Full Body 60min · Pay therapist after service',
+    progressTitle:'Service Progress',
+    odNo:'Order No.', odService:'Service', odAddr:'Address', odTime:'Time', odAmount:'Cash Amount',
+    orderDetailTitle:'Order Details', orderPageTitle:'My Orders',
+    ftAll:'All', ftOngoing:'Ongoing', ftDone:'Done', ftCancelled:'Cancelled',
+    ongoingChip:'Ongoing', doneChip:'Done',
+    profileName:'Ms. Lee', psOrders:'Orders', psRating:'Rating', psSpendLabel:'Spent',
+    modeSwitchLabel:'Switch Mode', modeUser:'👤 Client', modeTherapist:'💆 Therapist', modeAdmin:'⚙️ Admin',
+    menuCoupon:'Coupons', menuCollect:'Favorites', menuAddress:'My Addresses', menuSupport:'Support',
+    menuNotify:'Notifications', menuSettings:'Settings', logoutBtn:'Log Out',
+    thGreet:'Welcome back', thStat1:'Today Income', thStat2:'Today Orders', thStat3:'Fee Due',
+    toggleLabel:'Service Status', toggleOnSub:'● Online', toggleOffSub:'○ Offline',
+    faTitle:'Fee Payment Due', faBtn:'Pay Now →',
+    faBody:'You have 1 order with unpaid platform fee. <b>Pay before accepting new orders.</b><br>Amount due: <b>₭22,500</b>',
+    thOrdersTitle:'Pending Orders', ocNewChip:'New Order', ocDoneChip:'Serving',
+    ocService:'Full Body 60min', ocClient:'Client: Ms. Lee',
+    ocCashLabel:'Client Pays', ocFeeLabel:'Platform Fee',
+    ocReject:'Reject', ocAccept:'Accept', ocComplete:'Done & Pay Fee',
+    ocService2:'Thai Massage 60min', ocClient2:'Client: Mr. Chen', ocCashLabel2:'Client Pays',
+    thProfileBtn:'View Profile ›',
+    feePageTitle:'Fee Payment', feeWarning:'You cannot accept new orders until fees are paid',
+    feeOrderTitle:'Order Summary', foServiceL:'Service', foAmountL:'Client Paid', foRateL:'Fee Rate',
+    foTotalL:'Fee Due', fhLabel:'Transfer this amount to company account',
+    feeBankTitle:'Bank Account', biBank:'Bank', biAccount:'Account', biNameL:'Account Name', biRef:'Reference',
+    feeUploadTitle:'Upload Transfer Receipt', ubText:'Tap to upload screenshot', ubSub:'JPG / PNG, max 10MB',
+    feeSubmitWarning:'After submission, admin will review within 1-2 hours', submitFeeBtn:'Submit for Review',
+    tpTitle:'Therapist Profile', tpRating:'Rating', tpReviews:'Reviews', tpOrders:'Orders', tpExp:'Experience', tpRate:'Good Rate',
+    tpSOrders:'Completed', tpSExp:'Experience', tpSRating:'Rating',
+    tpSvcTitle:'Services', tpAboutTitle:'About Me',
+    tpAboutText:'With 3 years of professional massage experience, specialized in Lao traditional techniques and oil SPA. Has worked at several renowned massage shops in Vientiane, familiar with diverse client needs.',
+    tpSchTitle:'Hours', tpSchDay1:'Mon - Fri', tpSchDay2:'Sat - Sun',
+    tpShopTitle:'Affiliated Shop', tpShopName:'Vientiane Relax Center', tpShopAddr:'Sisattanak, Vientiane · 12 therapists',
+    tpCertTitle:'Certifications', tpCert1:'Lao Traditional Massage', tpCert2:'Thai Massage Lv.2', tpCert3:'Aromatherapy SPA',
+    tpEdit:'Edit Profile',
+    // --- New sub-pages en ---
+    tdetailTitle:'Therapist Detail', tdReviews:'280 Reviews', tdDist:'1.2km',
+    tdTag1:'Full Body', tdTag2:'Thai', tdTag3:'Oil', tdTag4:'3yr Exp',
+    tdSvcTitle:'Services', tdSvc1:'Lao Traditional', tdSvc1dur:'60min',
+    tdSvc2:'Thai Massage', tdSvc2dur:'60min', tdSvc3:'Oil Massage', tdSvc3dur:'60min',
+    tdAboutTitle:'About Me', tdAboutText:'With 3 years of professional massage experience, specialized in Lao traditional techniques and oil SPA. Has worked at several renowned massage shops in Vientiane, familiar with diverse client needs.',
+    tdShopTitle:'Affiliated Shop', tdShopName:'Vientiane Relax Center', tdShopSub:'6 therapists · Rating 4.7',
+    tdBookBtn:'Book Now',
+    svclistTitle:'All Services', ftAll:'All', ftLao:'Lao Massage', ftThai:'Thai Massage', ftOil:'Oil Massage', ftFoot:'Foot Massage', ftNeck:'Neck & Shoulder',
+    svc1Name:'Lao Traditional', svc1Desc:'Traditional Lao techniques, muscle relief', svc1Price:'60min · from <b>₭150,000</b>',
+    svc1bName:'Lao Traditional', svc1bDesc:'Deep relaxation, full body care', svc1bPrice:'90min · <b>₭220,000</b>',
+    svc2Name:'Thai Massage', svc2Desc:'Traditional Thai stretching', svc2Price:'60min · from <b>₭130,000</b>',
+    svc2bName:'Thai Massage', svc2bDesc:'Deep Thai pressure, restore flexibility', svc2bPrice:'90min · <b>₭200,000</b>',
+    svc3Name:'Oil Massage', svc3Desc:'Natural aromatherapy, nourish skin', svc3Price:'60min · <b>₭150,000</b>',
+    svc4Name:'Foot Massage', svc4Desc:'Acupressure, relieve leg fatigue', svc4Price:'60min · <b>₭80,000</b>',
+    svc5Name:'Neck & Shoulder', svc5Desc:'For office workers, relieve stiffness', svc5Price:'45min · <b>₭90,000</b>',
+    reviewTitle:'Write Review', reviewRsTitle:'Full Body 60min', reviewRsSub:'Nana · 2026-06-22', reviewPlaceholder:'Share your experience...', reviewSubmit:'Submit Review',
+    couponTitle:'Coupons', cpTag1:'Available', cpAmount1:'₭30,000', cpDesc1:'First order over ₭100,000', cpExpire1:'Valid until 2026-07-22',
+    cpTag2:'Available', cpAmount2:'₭20,000', cpDesc2:'Thai Massage · over ₭100,000', cpExpire2:'Valid until 2026-07-15',
+    cpTag3:'Used', cpAmount3:'₭15,000', cpDesc3:'over ₭150,000', cpExpire3:'Used on 2026-06-10',
+    cpTag4:'Expired', cpAmount4:'₭50,000', cpDesc4:'Launch event · over ₭200,000', cpExpire4:'Expired · 2026-05-31',
+    addrTitle:'My Addresses', addrTag1:'Default', addrName1:'Ms. Lee', addrText1:'Ban Dong Rd, Xaysettha District, Vientiane<br>Near Central Market',
+    addrName2:'Office', addrText2:'Sisattanak Rd, Vientiane<br>Vientiane Tower 5F', addrAddBtn:'＋ Add Address',
+    favTitle:'Favorites', favEmptyText:'No favorite therapists yet', favEmptySub:'Browse the homepage and save your favorites',
+    supportTitle:'Support', spOnline:'Live Chat', spFaq:'FAQs', spOrder:'Order Help', spRefund:'Refund Help', spFeedback:'Feedback',
+    spContact:'Hotline: +856 21 555 888<br>Hours: 08:00 - 22:00',
+    settingsTitle:'Settings', setNotify:'Notifications', setLang:'Language', setLangVal:'English', setPrivacy:'Privacy', setCache:'Clear Cache', setAbout:'About Us', setLogout:'Log Out',
+    thOrdersTitle:'Order History', thoAll:'All', thoDone:'Completed', thoCancel:'Cancelled',
+    thoS1:'Full Body 60min', thoS2:'Thai Massage 60min', thoS3:'Oil Massage 60min', thoS4:'Foot Massage 60min',
+    thEarnTitle:'Earnings', earnMonth:'This Month', earnFee:'Fees Paid', earnNet:'Net Income', earnOrders:'Completed', earnRating:'Avg Rating', earnRecent:'Recent Earnings',
+    earnS1:'Full Body · Ms. Lee', earnS2:'Thai Massage · Mr. Chen', earnS3:'Fee Deduction', earnS4:'Oil Massage · Mrs. Zhang',
+    aoTitle:'All Orders', aoAllL:'All', aoOngoing:'Ongoing', aoDone:'Done', aoPending:'Pending Review',
+    aoS1:'Full Body 60min', aoM1:'Ms. Lee · Nana · 06-22 14:00', aoSt1:'Ongoing',
+    aoS2:'Thai Massage 60min', aoM2:'Mr. Chen · Khamphet · 06-21 10:00', aoSt2:'Done',
+    aoS3:'Oil Massage 60min', aoM3:'Mrs. Zhang · Souphavanh · 06-20 15:30', aoSt3:'Done',
+    aoS4:'Neck Shoulder 45min', aoM4:'Ms. Wang · Nana · 06-19 16:00', aoSt4:'Done',
+    aoS5:'Foot Massage 60min', aoM5:'Mr. Zhao · Khamphet · 06-18 11:00', aoSt5:'Pending',
+    atTitle:'Therapists', atAdd:'＋ Add', atAllL:'All (12)', atOnlineL:'Online (5)', atOfflineL:'Offline (4)', atReviewL:'Review (3)',
+    atSt1:'Online', atSt2:'Busy', atSt3:'Offline', atSt4:'Online',
+    alOrdersBtn:'📋 All Orders', alTherapistsBtn:'💆 Therapists',
+    thlOrdersBtn:'📋 Order History', thlEarnBtn:'💰 Earnings',
+  },
+  th: {
+
+    greet:'สวัสดีตอนเย็น 👋', heroName:'คุณหลี่', catTitle:'บริการ',
+    cat1:'นวดลาว', cat2:'นวดไทย', cat3:'นวดน้ำมัน', cat4:'นวดเท้า', cat5:'นวดหัวไหล่', cat6:'ทั้งหมด',
+    nearbyTitle:'นักนวดใกล้เคียง', seeAll:'ดูทั้งหมด',
+    navHome:'หน้าหลัก', navOrders:'คำสั่ง', navProfile:'โปรไฟล์',
+    b1tag:'โปรพิเศษ', b1title:'ครั้งแรก\nลด 20%', b1sub:'₭150,000 → <b>₭120,000</b> · ผู้ใช้ใหม่',
+    b2tag:'แนะนำสัปดาห์นี้', b2title:'นวดไทย\nราคาดีสุด', b2sub:'60 นาที <b>₭120,000</b> · แบบดั้งเดิม',
+    b3tag:'สมาชิก', b3title:'แพ็กรายเดือน\n4 ครั้ง/เดือน', b3sub:'<b>₭480,000</b> · ประหยัด ₭120,000',
+    ordersLabel:'ครั้ง', dist:'ห่าง',
+    bkServiceTitle:'เลือกบริการ', bkTimeTitle:'เลือกเวลา', bkAddrTitle:'ที่อยู่บริการ',
+    bkOrdersLabel:'ครั้ง',
+    s1:'นวดลาวดั้งเดิม 60 น.', s1d:'เทคนิคลาวแบบดั้งเดิม คลายกล้ามเนื้อ',
+    s2:'นวดลาวดั้งเดิม 90 น.', s2d:'ผ่อนคลายลึก บรรเทาอาการล้า',
+    s3:'นวดไทย 60 น.', s3d:'เหยียดแบบไทยดั้งเดิม เพิ่มความยืดหยุ่น',
+    s4:'นวดไทย 90 น.', s4d:'กดแบบไทยลึก ฟื้นฟูความยืดหยุ่น',
+    s5:'นวดน้ำมัน 60 น.', s5d:'น้ำมันหอมธรรมชาติ บำรุงผิว ผ่อนคลาย',
+    s6:'นวดเท้า 60 น.', s6d:'กดจุดฝ่าเท้า คลายล้าขา',
+    s7:'หัวไหล่คอ 45 น.', s7d:'เหมาะสำหรับคนออฟฟิศ แก้ปวดคอบ่า',
+    tsFull:'เต็ม',
+    addrPh:'Ban Dong Rd, Xaysettha, Vientiane',
+    cashTitle:'ชำระเงินสดที่บ้าน',
+    cashBody:'ชำระ<b>เงินสด</b>ให้กับนักนวดโดยตรง ไม่ต้องจ่ายล่วงหน้าออนไลน์<br>หลังบริการ นักนวดจะโอนค่าธรรมเนียมให้แพลตฟอร์ม',
+    bfTotalLabel:'ยอดชำระ', bfFeeLabel:'ค่าธรรมเนียม',
+    confirmBtn:'ยืนยันการจอง',
+    ohLabel:'สถานะ', ohStatus:'นักนวดกำลังมา',
+    ohTime:'ถึงประมาณ 14:30 น. · ~15 นาที',
+    tfcEta:'⚡ อีกประมาณ 15 นาที',
+    crTitle:'เตรียมเงินสด', crLabel:'นวดทั้งตัว 60 น. · ชำระหลังบริการ',
+    progressTitle:'ความคืบหน้า',
+    odNo:'รหัสคำสั่ง', odService:'บริการ', odAddr:'ที่อยู่', odTime:'เวลาจอง', odAmount:'ยอดเงินสด',
+    orderDetailTitle:'รายละเอียด', orderPageTitle:'คำสั่งซื้อ',
+    ftAll:'ทั้งหมด', ftOngoing:'กำลังดำเนินการ', ftDone:'เสร็จสิ้น', ftCancelled:'ยกเลิก',
+    ongoingChip:'กำลังดำเนินการ', doneChip:'เสร็จสิ้น',
+    profileName:'คุณหลี่', psOrders:'คำสั่ง', psRating:'คะแนน', psSpendLabel:'ยอดใช้',
+    modeSwitchLabel:'เปลี่ยนโหมด', modeUser:'👤 ผู้ใช้', modeTherapist:'💆 นักนวด', modeAdmin:'⚙️ แอดมิน',
+    menuCoupon:'คูปอง', menuCollect:'นักนวดโปรด', menuAddress:'ที่อยู่ของฉัน', menuSupport:'ช่วยเหลือ',
+    menuNotify:'การแจ้งเตือน', menuSettings:'ตั้งค่า', logoutBtn:'ออกจากระบบ',
+    thGreet:'ยินดีต้อนรับ', thStat1:'รายได้วันนี้', thStat2:'คำสั่งวันนี้', thStat3:'ค่าธรรมเนียมค้างชำระ',
+    toggleLabel:'สถานะรับงาน', toggleOnSub:'● รับงานอยู่', toggleOffSub:'○ หยุดพัก',
+    faTitle:'ค่าธรรมเนียมค้างชำระ', faBtn:'ชำระตอนนี้ →',
+    faBody:'คุณมีค่าธรรมเนียม 1 รายการที่ยังไม่ชำระ <b>ต้องชำระก่อนจึงรับงานใหม่ได้</b><br>ยอดค้าง: <b>₭22,500</b>',
+    thOrdersTitle:'คำสั่งรอดำเนินการ', ocNewChip:'งานใหม่', ocDoneChip:'กำลังให้บริการ',
+    ocService:'นวดทั้งตัว 60 น.', ocClient:'ลูกค้า: คุณหลี่',
+    ocCashLabel:'ลูกค้าจ่ายสด', ocFeeLabel:'ค่าธรรมเนียมแพลตฟอร์ม',
+    ocReject:'ปฏิเสธ', ocAccept:'รับงาน', ocComplete:'เสร็จ & ชำระค่าธรรมเนียม',
+    ocService2:'นวดไทย 60 น.', ocClient2:'ลูกค้า: คุณเฉิน', ocCashLabel2:'ลูกค้าจ่ายสด',
+    thProfileBtn:'ดูโปรไฟล์นักนวด ›',
+    feePageTitle:'ชำระค่าธรรมเนียม', feeWarning:'ต้องชำระค่าธรรมเนียมก่อนจึงรับงานใหม่ได้',
+    feeOrderTitle:'สรุปคำสั่ง', foServiceL:'บริการ', foAmountL:'เงินสดจากลูกค้า', foRateL:'อัตราค่าธรรมเนียม',
+    foTotalL:'ค่าธรรมเนียมที่ต้องชำระ', fhLabel:'โอนจำนวนนี้ไปยังบัญชีบริษัท',
+    feeBankTitle:'บัญชีผู้รับ', biBank:'ธนาคาร', biAccount:'เลขบัญชี', biNameL:'ชื่อบัญชี', biRef:'อ้างอิง',
+    feeUploadTitle:'อัปโหลดหลักฐาน', ubText:'แตะเพื่ออัปโหลดหน้าจอ', ubSub:'JPG / PNG ไม่เกิน 10MB',
+    feeSubmitWarning:'กรุณายืนยันว่าโอนแล้วก่อนส่ง', submitFeeBtn:'ส่งหลักฐานการชำระ',
+    adminTitle:'แดชบอร์ดแอดมิน', adminSub:'Vientiane Wellness Co., Ltd', adminExportBtn:'ส่งออก',
+    asGmv:'GMV เดือนนี้', asIncome:'รายได้แพลตฟอร์ม', asOrders:'คำสั่งเดือนนี้', asOnline:'นักนวดออนไลน์',
+    feeReviewTitle:'ตรวจสอบค่าธรรมเนียม', chipReview:'รอตรวจสอบ', chipPending:'ยังไม่ชำระ', chipPaid:'เข้าบัญชีแล้ว',
+    feeRateTitle:'ตั้งค่าอัตราค่าธรรมเนียม',
+    rate1:'นวดลาว', rate2:'นวดไทย', rate3:'นวดน้ำมัน',
+    partnerTitle:'ร้านนวดพันธมิตร',
+    shop1Sub:'6 นักนวด · วันนี้ 5 คนออนไลน์', shop2Sub:'4 นักนวด · วันนี้ 4 คนออนไลน์', shop3Sub:'3 นักนวด · กำลังตรวจสอบ',
+    sActive:'เปิดบริการ', sPending:'กำลังตรวจสอบ',
+    backHomeBtn:'← กลับหน้าหลัก', adminBackBtn:'← กลับโปรไฟล์',
+    steps: ['ยืนยันคำสั่ง', 'นักนวดกำลังมา', 'กำลังให้บริการ', 'บริการเสร็จสิ้น'],
+    stepsTimes: ['14:00','14:05','',''],
+    stepsDescs: ['ยืนยันการจองแล้ว', 'นักนวดกำลังมายังที่อยู่ของคุณ', 'บริการจะเริ่มเมื่อถึง', 'บริการเสร็จ กรุณาชำระเงินสด'],
+    // Therapist Profile
+    tpTitle:'โปรไฟล์นักนวด', tpRole:'นักนวดอาวุโส', tpReviews:'(280 รีวิว)',
+    tpSOrders:'คำสั่งเสร็จ', tpSExp:'ประสบการณ์', tpSRate:'คะแนน',
+    tpSvcTitle:'บริการ', tpAboutTitle:'เกี่ยวกับฉัน',
+    tpAboutText:'มีประสบการณ์นวดมืออาชีพ 3 ปี เชี่ยวชาญเทคนิคลาวดั้งเดิมและสปาน้ำมัน เคยทำงานที่ร้านนวดชื่อดังหลายแห่งในเวียงจันทน์ คุ้นเคยกับความต้องการของลูกค้าที่หลากหลาย บริการใส่ใจ เทคนิคมืออาชีพ มุ่งมั่นสร้างประสบการณ์ผ่อนคลายที่ดีที่สุด',
+    tpSchTitle:'เวลาให้บริการ', tpSchDay1:'จันทร์ - ศุกร์', tpSchDay2:'เสาร์ - อาทิตย์',
+    tpShopTitle:'ร้านพันธมิตร', tpShopName:'ศูนย์นวด Vientiane Wellness', tpShopAddr:'สีสัตตนาค, เวียงจันทน์ · 12 นักนวด',
+    tpCertTitle:'ใบรับรอง', tpCert1:'นวดลาวดั้งเดิม', tpCert2:'นวดไทย Lv.2', tpCert3:'สปาอโรม่า',
+    tpEdit:'แก้ไขโปรไฟล์',
+    // --- New sub-pages th ---
+    tdetailTitle:'รายละเอียดนักนวด', tdReviews:'280 รีวิว', tdDist:'1.2กม.',
+    tdTag1:'นวดทั้งตัว', tdTag2:'นวดไทย', tdTag3:'น้ำมัน', tdTag4:'3ปีประสบการณ์',
+    tdSvcTitle:'บริการ', tdSvc1:'นวดลาวดั้งเดิม', tdSvc1dur:'60นาที',
+    tdSvc2:'นวดไทย', tdSvc2dur:'60นาที', tdSvc3:'นวดน้ำมัน', tdSvc3dur:'60นาที',
+    tdAboutTitle:'เกี่ยวกับฉัน', tdAboutText:'มีประสบการณ์นวด3ปี เชี่ยวชาญเทคนิคดั้งเดิมของลาวและสปาน้ำมัน',
+    tdShopTitle:'ร้านที่สังกัด', tdShopName:'Vientiane Relax Center', tdShopSub:'นักนวด6คน · คะแนน4.7',
+    tdBookBtn:'จองเลย',
+    svclistTitle:'บริการทั้งหมด', ftAll:'ทั้งหมด', ftLao:'นวดลาว', ftThai:'นวดไทย', ftOil:'นวดน้ำมัน', ftFoot:'นวดเท้า', ftNeck:'นวดหัวไหล่',
+    svc1Name:'นวดลาวดั้งเดิม', svc1Desc:'เทคนิคลาวดั้งเดิม คลายกล้ามเนื้อ', svc1Price:'60นาที · เริ่ม <b>₭150,000</b>',
+    svc1bName:'นวดลาวดั้งเดิม', svc1bDesc:'ผ่อนคลายลึก ดูแลทั่วตัว', svc1bPrice:'90นาที · <b>₭220,000</b>',
+    svc2Name:'นวดไทย', svc2Desc:'ยืดเส้นแบบไทยดั้งเดิม', svc2Price:'60นาที · เริ่ม <b>₭130,000</b>',
+    svc2bName:'นวดไทย', svc2bDesc:'กดจุดลึกแบบไทย ฟื้นฟูความยืดหยุ่น', svc2bPrice:'90นาที · <b>₭200,000</b>',
+    svc3Name:'นวดน้ำมัน', svc3Desc:'น้ำมันหอมธรรมชาติ บำรุงผิว', svc3Price:'60นาที · <b>₭150,000</b>',
+    svc4Name:'นวดเท้า', svc4Desc:'กดจุดฝ่าเท้า คลายล้าขา', svc4Price:'60นาที · <b>₭80,000</b>',
+    svc5Name:'นวดหัวไหล่คอ', svc5Desc:'สำหรับคนออฟฟิศ แก้ปวดคอบ่า', svc5Price:'45นาที · <b>₭90,000</b>',
+    reviewTitle:'เขียนรีวิว', reviewRsTitle:'นวดทั้งตัว60นาที', reviewRsSub:'นานา · 2026-06-22', reviewPlaceholder:'แบ่งปันประสบการณ์ของคุณ...', reviewSubmit:'ส่งรีวิว',
+    couponTitle:'คูปอง', cpTag1:'ใช้ได้', cpAmount1:'₭30,000', cpDesc1:'คำสั่งแรกเกิน₭100,000', cpExpire1:'ใช้ได้ถึง2026-07-22',
+    cpTag2:'ใช้ได้', cpAmount2:'₭20,000', cpDesc2:'นวดไทย · เกิน₭100,000', cpExpire2:'ใช้ได้ถึง2026-07-15',
+    cpTag3:'ใช้แล้ว', cpAmount3:'₭15,000', cpDesc3:'เกิน₭150,000', cpExpire3:'ใช้แล้ว2026-06-10',
+    cpTag4:'หมดอายุ', cpAmount4:'₭50,000', cpDesc4:'โปรเปิดตัว · เกิน₭200,000', cpExpire4:'หมดอายุ · 2026-05-31',
+    addrTitle:'ที่อยู่ของฉัน', addrTag1:'ค่าเริ่มต้น', addrName1:'คุณหลี่', addrText1:'Ban Dong Rd, Xaysettha District, Vientiane<br>ใกล้ตลาดกลาง',
+    addrName2:'ออฟฟิศ', addrText2:'Sisattanak Rd, Vientiane<br>Vientiane Tower 5F', addrAddBtn:'＋ เพิ่มที่อยู่',
+    favTitle:'นักนวดที่ชื่นชอบ', favEmptyText:'ยังไม่มีนักนวดที่ชื่นชอบ', favEmptySub:'ไปที่หน้าหลักและบันทึกนักนวดที่คุณชอบ',
+    supportTitle:'ฝ่ายสนับสนุน', spOnline:'แชทสด', spFaq:'คำถามที่พบบ่อย', spOrder:'ช่วยเหลือคำสั่ง', spRefund:'ช่วยเหลือคืนเงิน', spFeedback:'ข้อเสนอแนะ',
+    spContact:'สายด่วน:+85621555888<br>เวลา:08:00-22:00',
+    settingsTitle:'ตั้งค่า', setNotify:'การแจ้งเตือน', setLang:'ภาษา', setLangVal:'ไทย', setPrivacy:'ความเป็นส่วนตัว', setCache:'ล้างแคช', setAbout:'เกี่ยวกับเรา', setLogout:'ออกจากระบบ',
+    thOrdersTitle:'ประวัติคำสั่ง', thoAll:'ทั้งหมด', thoDone:'เสร็จสิ้น', thoCancel:'ยกเลิก',
+    thoS1:'นวดทั้งตัว60นาที', thoS2:'นวดไทย60นาที', thoS3:'นวดน้ำมัน60นาที', thoS4:'นวดเท้า60นาที',
+    thEarnTitle:'รายได้', earnMonth:'เดือนนี้', earnFee:'ค่าธรรมเนียม', earnNet:'รายได้สุทธิ', earnOrders:'คำสั่งเสร็จ', earnRating:'คะแนนเฉลี่ย', earnRecent:'รายได้ล่าสุด',
+    earnS1:'นวดทั้งตัว · คุณหลี่', earnS2:'นวดไทย · คุณเฉิน', earnS3:'หักค่าธรรมเนียม', earnS4:'นวดน้ำมัน · คุณจาง',
+    aoTitle:'คำสั่งทั้งหมด', aoAllL:'ทั้งหมด', aoOngoing:'กำลังดำเนินการ', aoDone:'เสร็จสิ้น', aoPending:'รอตรวจสอบ',
+    aoS1:'นวดทั้งตัว60นาที', aoM1:'คุณหลี่ · นานา · 06-2214:00', aoSt1:'กำลังดำเนินการ',
+    aoS2:'นวดไทย60นาที', aoM2:'คุณเฉิน · คำเพชร · 06-2110:00', aoSt2:'เสร็จสิ้น',
+    aoS3:'นวดน้ำมัน60นาที', aoM3:'คุณจาง · สุภาวัณ · 06-2015:30', aoSt3:'เสร็จสิ้น',
+    aoS4:'นวดหัวไหล่45นาที', aoM4:'คุณหวัง · นานา · 06-1916:00', aoSt4:'เสร็จสิ้น',
+    aoS5:'นวดเท้า60นาที', aoM5:'คุณจ้าว · คำเพชร · 06-1811:00', aoSt5:'รอตรวจสอบ',
+    atTitle:'จัดการนักนวด', atAdd:'＋ เพิ่ม', atAllL:'ทั้งหมด(12)', atOnlineL:'ออนไลน์(5)', atOfflineL:'ออฟไลน์(4)', atReviewL:'รอตรวจ(3)',
+    atSt1:'ออนไลน์', atSt2:'ให้บริการ', atSt3:'ออฟไลน์', atSt4:'ออนไลน์',
+    alOrdersBtn:'📋 คำสั่งทั้งหมด', alTherapistsBtn:'💆 นักนวด',
+    thlOrdersBtn:'📋 ประวัติคำสั่ง', thlEarnBtn:'💰 รายได้',
+  },
+};
+
+/* ─── STATE ─── */
+let lang = 'zh';
+let bannerIdx = 0;
+let bannerTimer;
+let selectedPrice = 150000;
+let currentPage = 'page-home';
+let pageStack = [];
+let isOnline = true;
+let uploaded = false;
+
+/* ─── LANGUAGE ─── */
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    if (b.textContent.includes(l === 'zh' ? '中文' : l === 'en' ? 'English' : 'ภาษา')) b.classList.add('active');
+  });
+  applyLang();
+}
+
+function t(key) { return (i18n[lang] || i18n.zh)[key] || i18n.zh[key] || key; }
+
+function applyLang() {
+  const L = i18n[lang] || i18n.zh;
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+
+  // Home
+  set('greet-text', L.greet); set('hero-name', L.heroName);
+  set('cat-title', L.catTitle); set('nearby-title', L.nearbyTitle); set('see-all', L.seeAll);
+  set('cat1', L.cat1); set('cat2', L.cat2); set('cat3', L.cat3); set('cat4', L.cat4);
+  set('cat5', L.cat5); set('cat6', L.cat6);
+  set('b1-tag', L.b1tag); set('b1-sub', L.b1sub);
+  set('b2-tag', L.b2tag); set('b2-sub', L.b2sub);
+  set('b3-tag', L.b3tag); set('b3-sub', L.b3sub);
+  if (document.getElementById('b1-title')) document.getElementById('b1-title').innerHTML = L.b1title.replace('\n','<br>');
+  if (document.getElementById('b2-title')) document.getElementById('b2-title').innerHTML = L.b2title.replace('\n','<br>');
+  if (document.getElementById('b3-title')) document.getElementById('b3-title').innerHTML = L.b3title.replace('\n','<br>');
+
+  // Nav labels
+  ['nav-home-label','nav-home-l2','nav-home-l3'].forEach(id => set(id, L.navHome));
+  ['nav-orders-label','nav-orders-l2','nav-orders-l3'].forEach(id => set(id, L.navOrders));
+  ['nav-profile-label','nav-profile-l2','nav-profile-l3'].forEach(id => set(id, L.navProfile));
+
+  // Booking
+  set('bk-service-title', L.bkServiceTitle); set('bk-time-title', L.bkTimeTitle); set('bk-addr-title', L.bkAddrTitle);
+  set('bk-orders-label', L.bkOrdersLabel);
+  set('s1-name', L.s1); set('s1-desc', L.s1d); set('s2-name', L.s2); set('s2-desc', L.s2d);
+  set('s3-name', L.s3); set('s3-desc', L.s3d); set('s4-name', L.s4); set('s4-desc', L.s4d);
+  set('ts-full', L.tsFull); set('addr-placeholder', L.addrPh);
+  set('cash-notice-title', L.cashTitle); set('cash-notice-body', L.cashBody);
+  set('bf-total-label', L.bfTotalLabel); set('bf-fee-label', L.bfFeeLabel);
+  set('book-confirm-btn', L.confirmBtn);
+
+  // Order Tracking
+  set('oh-label', L.ohLabel); set('oh-status', L.ohStatus); set('oh-time', L.ohTime);
+  set('tfc-eta', L.tfcEta); set('cr-title', L.crTitle); set('cr-label', L.crLabel);
+  set('progress-title', L.progressTitle);
+  set('od-no', L.odNo); set('od-service', L.odService); set('od-addr', L.odAddr);
+  set('od-time', L.odTime); set('od-amount', L.odAmount);
+  set('order-detail-title', L.orderDetailTitle); set('back-home-btn', L.backHomeBtn);
+  renderProgressSteps();
+
+  // Orders Page
+  set('orders-page-title', L.orderPageTitle);
+  set('ft-all', L.ftAll); set('ft-ongoing', L.ftOngoing); set('ft-done', L.ftDone); set('ft-cancelled', L.ftCancelled);
+  renderOrderList('all');
+
+  // Profile
+  set('profile-name-text', L.profileName); set('ps-orders', L.psOrders);
+  set('ps-rating', L.psRating); set('ps-spend-label', L.psSpendLabel);
+  set('mode-switch-label', L.modeSwitchLabel);
+  set('mode-user', L.modeUser); set('mode-therapist', L.modeTherapist); set('mode-admin', L.modeAdmin);
+  set('menu-coupon', L.menuCoupon); set('menu-collect', L.menuCollect); set('menu-address', L.menuAddress);
+  set('menu-support', L.menuSupport); set('menu-notify', L.menuNotify); set('menu-settings', L.menuSettings);
+  set('logout-btn', L.logoutBtn);
+
+  // Therapist
+  set('th-greet', L.thGreet); set('th-stat1', L.thStat1); set('th-stat2', L.thStat2); set('th-stat3', L.thStat3);
+  set('toggle-label', L.toggleLabel); set('toggle-sub', isOnline ? L.toggleOnSub : L.toggleOffSub);
+  set('fa-title', L.faTitle); set('fa-body', L.faBody); set('fa-btn', L.faBtn);
+  set('th-orders-title', L.thOrdersTitle); set('oc-new-chip', L.ocNewChip); set('oc-done-chip', L.ocDoneChip);
+  set('oc-service', L.ocService); set('oc-client', L.ocClient);
+  set('oc-cash-label', L.ocCashLabel); set('oc-fee-label', L.ocFeeLabel);
+  set('oc-reject', L.ocReject); set('oc-accept', L.ocAccept); set('oc-complete', L.ocComplete);
+  set('oc-service2', L.ocService2); set('oc-client2', L.ocClient2); set('oc-cash-label2', L.ocCashLabel2);
+  set('th-profile-btn', L.thProfileBtn);
+
+  // Therapist Profile
+  set('tp-title', L.tpTitle); set('tp-role', L.tpRole); set('tp-reviews', L.tpReviews);
+  set('tp-s-orders', L.tpSOrders); set('tp-s-exp', L.tpSExp); set('tp-s-rate', L.tpSRate);
+  set('tp-svc-title', L.tpSvcTitle); set('tp-about-title', L.tpAboutTitle);
+  set('tp-about-text', L.tpAboutText); set('tp-sch-title', L.tpSchTitle);
+  set('tp-sch-day1', L.tpSchDay1); set('tp-sch-day2', L.tpSchDay2);
+  set('tp-shop-title', L.tpShopTitle); set('tp-shop-name', L.tpShopName);
+  set('tp-shop-addr', L.tpShopAddr); set('tp-cert-title', L.tpCertTitle);
+  set('tp-cert1', L.tpCert1); set('tp-cert2', L.tpCert2); set('tp-cert3', L.tpCert3);
+
+  // Fee Page
+  set('fee-page-title', L.feePageTitle); set('fee-warning-text', L.feeWarning);
+  set('fee-order-title', L.feeOrderTitle); set('fo-service-l', L.foServiceL);
+  set('fo-amount-l', L.foAmountL); set('fo-rate-l', L.foRateL); set('fo-total-l', L.foTotalL);
+  set('fh-label', L.fhLabel); set('fee-bank-title', L.feeBankTitle);
+  set('bi-bank', L.biBank); set('bi-account', L.biAccount); set('bi-name-l', L.biNameL); set('bi-ref', L.biRef);
+  set('fee-upload-title', L.feeUploadTitle); set('ub-text', L.ubText); set('ub-sub', L.ubSub);
+  set('fee-submit-warning', L.feeSubmitWarning); set('submit-fee-btn', L.submitFeeBtn);
+
+  // Admin
+  set('admin-title', L.adminTitle); set('admin-sub', L.adminSub); set('admin-export-btn', L.adminExportBtn);
+  set('as-gmv', L.asGmv); set('as-income', L.asIncome); set('as-orders', L.asOrders); set('as-online', L.asOnline);
+  set('fee-review-title', L.feeReviewTitle); set('chip-review', L.chipReview);
+  set('chip-pending', L.chipPending); set('chip-paid', L.chipPaid);
+  set('fee-rate-title', L.feeRateTitle);
+  set('rate1-label', L.rate1); set('rate2-label', L.rate2); set('rate3-label', L.rate3);
+  set('partner-title', L.partnerTitle);
+  set('shop1-sub', L.shop1Sub); set('shop2-sub', L.shop2Sub); set('shop3-sub', L.shop3Sub);
+  set('s-active', L.sActive); set('s-pending', L.sPending); set('admin-back-btn', L.adminBackBtn);
+  set('al-orders-btn', L.alOrdersBtn); set('al-therapists-btn', L.alTherapistsBtn);
+
+  // Therapist Detail (User View)
+  set('tdetail-title', L.tdetailTitle); set('tdetail-reviews', L.tdReviews); set('tdetail-dist', L.tdDist);
+  set('td-tag1', L.tdTag1); set('td-tag2', L.tdTag2); set('td-tag3', L.tdTag3); set('td-tag4', L.tdTag4);
+  set('td-svc-title', L.tdSvcTitle); set('td-svc1', L.tdSvc1); set('td-svc1dur', L.tdSvc1dur);
+  set('td-svc2', L.tdSvc2); set('td-svc2dur', L.tdSvc2dur); set('td-svc3', L.tdSvc3); set('td-svc3dur', L.tdSvc3dur);
+  set('td-about-title', L.tdAboutTitle); set('td-about-text', L.tdAboutText);
+  set('td-shop-title', L.tdShopTitle); set('td-shop-name', L.tdShopName); set('td-shop-sub', L.tdShopSub);
+  set('td-book-btn', L.tdBookBtn);
+
+  // Service List
+  set('svclist-title', L.svclistTitle); set('ft-all', L.ftAll); set('ft-lao', L.ftLao);
+  set('ft-thai', L.ftThai); set('ft-oil', L.ftOil); set('ft-foot', L.ftFoot); set('ft-neck', L.ftNeck);
+  set('svc1-name', L.svc1Name); set('svc1-desc', L.svc1Desc); set('svc1-price', L.svc1Price);
+  set('svc1b-name', L.svc1bName); set('svc1b-desc', L.svc1bDesc); set('svc1b-price', L.svc1bPrice);
+  set('svc2-name', L.svc2Name); set('svc2-desc', L.svc2Desc); set('svc2-price', L.svc2Price);
+  set('svc2b-name', L.svc2bName); set('svc2b-desc', L.svc2bDesc); set('svc2b-price', L.svc2bPrice);
+  set('svc3-name', L.svc3Name); set('svc3-desc', L.svc3Desc); set('svc3-price', L.svc3Price);
+  set('svc4-name', L.svc4Name); set('svc4-desc', L.svc4Desc); set('svc4-price', L.svc4Price);
+  set('svc5-name', L.svc5Name); set('svc5-desc', L.svc5Desc); set('svc5-price', L.svc5Price);
+
+  // Review
+  set('review-title', L.reviewTitle); set('review-rs-title', L.reviewRsTitle);
+  set('review-rs-sub', L.reviewRsSub); set('review-placeholder', L.reviewPlaceholder); set('review-submit', L.reviewSubmit);
+
+  // Coupons
+  set('coupon-title', L.couponTitle); set('cp-tag1', L.cpTag1); set('cp-amount1', L.cpAmount1);
+  set('cp-desc1', L.cpDesc1); set('cp-expire1', L.cpExpire1);
+  set('cp-tag2', L.cpTag2); set('cp-amount2', L.cpAmount2); set('cp-desc2', L.cpDesc2); set('cp-expire2', L.cpExpire2);
+  set('cp-tag3', L.cpTag3); set('cp-amount3', L.cpAmount3); set('cp-desc3', L.cpDesc3); set('cp-expire3', L.cpExpire3);
+  set('cp-tag4', L.cpTag4); set('cp-amount4', L.cpAmount4); set('cp-desc4', L.cpDesc4); set('cp-expire4', L.cpExpire4);
+
+  // Address
+  set('addr-title', L.addrTitle); set('addr-tag1', L.addrTag1);
+  set('addr-name1', L.addrName1); set('addr-text1', L.addrText1);
+  set('addr-name2', L.addrName2); set('addr-text2', L.addrText2); set('addr-add-btn', L.addrAddBtn);
+
+  // Favorites
+  set('fav-title', L.favTitle); set('fav-empty-text', L.favEmptyText); set('fav-empty-sub', L.favEmptySub);
+
+  // Support
+  set('support-title', L.supportTitle); set('sp-online', L.spOnline); set('sp-faq', L.spFaq);
+  set('sp-order', L.spOrder); set('sp-refund', L.spRefund); set('sp-feedback', L.spFeedback);
+  set('sp-contact', L.spContact);
+
+  // Settings
+  set('settings-title', L.settingsTitle); set('set-notify', L.setNotify); set('set-lang', L.setLang);
+  set('set-lang-val', L.setLangVal); set('set-privacy', L.setPrivacy); set('set-cache', L.setCache);
+  set('set-about', L.setAbout); set('set-logout', L.setLogout);
+
+  // Therapist Order History
+  set('th-orders-title', L.thOrdersTitle); set('tho-all', L.thoAll); set('tho-done', L.thoDone); set('tho-cancel', L.thoCancel);
+  set('tho-s1', L.thoS1); set('tho-s2', L.thoS2); set('tho-s3', L.thoS3); set('tho-s4', L.thoS4);
+
+  // Therapist Earnings
+  set('th-earn-title', L.thEarnTitle); set('earn-month', L.earnMonth); set('earn-fee', L.earnFee);
+  set('earn-net', L.earnNet); set('earn-orders', L.earnOrders); set('earn-rating', L.earnRating); set('earn-recent', L.earnRecent);
+  set('earn-s1', L.earnS1); set('earn-s2', L.earnS2); set('earn-s3', L.earnS3); set('earn-s4', L.earnS4);
+
+  // Admin Orders
+  set('ao-title', L.aoTitle); set('ao-all', L.aoAllL); set('ao-ongoing', L.aoOngoing);
+  set('ao-done', L.aoDone); set('ao-pending', L.aoPending);
+  set('ao-s1', L.aoS1); set('ao-m1', L.aoM1); set('ao-st1', L.aoSt1);
+  set('ao-s2', L.aoS2); set('ao-m2', L.aoM2); set('ao-st2', L.aoSt2);
+  set('ao-s3', L.aoS3); set('ao-m3', L.aoM3); set('ao-st3', L.aoSt3);
+  set('ao-s4', L.aoS4); set('ao-m4', L.aoM4); set('ao-st4', L.aoSt4);
+  set('ao-s5', L.aoS5); set('ao-m5', L.aoM5); set('ao-st5', L.aoSt5);
+
+  // Admin Therapists
+  set('at-title', L.atTitle); set('at-add', L.atAdd); set('at-all', L.atAllL);
+  set('at-online', L.atOnlineL); set('at-offline', L.atOfflineL); set('at-review', L.atReviewL);
+  set('at-st1', L.atSt1); set('at-st2', L.atSt2); set('at-st3', L.atSt3); set('at-st4', L.atSt4);
+
+  // Therapist home quick links
+  set('thl-orders-btn', L.thlOrdersBtn); set('thl-earn-btn', L.thlEarnBtn);
+
+  // Service item in fee page
+  set('fo-service', lang === 'zh' ? '全身按摩 60min' : lang === 'en' ? 'Full Body 60min' : 'นวดทั้งตัว 60น.');
+
+  // Review textarea placeholder (set uses innerHTML, so handle placeholder separately)
+  const rv = document.getElementById('review-text');
+  if (rv) rv.placeholder = L.reviewPlaceholder;
+
+  renderTherapistList();
+}
+
+/* ─── THERAPIST LIST ─── */
+function renderTherapistList() {
+  const L = i18n[lang] || i18n.zh;
+  const container = document.getElementById('therapist-list');
+  if (!container) return;
+  container.innerHTML = therapists.map(th => `
+    <div class="therapist-card" onclick="goPage('page-tdetail')">
+      <div class="tc-img">
+        <span style="font-size:60px;">${th.emoji}</span>
+        <div class="tc-selected">${lang==='zh'?'精選技師':lang==='en'?'Featured':'แนะนำ'}</div>
+        <div class="tc-avail">
+          ${th.available ? '<div class="dot"></div>' : ''}
+          ${th.available ? (lang==='zh'?'可預約':lang==='en'?'Available':'ว่าง') : (lang==='zh'?'服務中':lang==='en'?'Busy':'ไม่ว่าง')}
+        </div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-top">
+          <div class="tc-name">${lang==='en'?th.nameEn:lang==='th'?th.nameTh:th.name}</div>
+          <div class="tc-price">${th.price}</div>
+        </div>
+        <div class="tc-rating">
+          <span class="tc-stars">★★★★${th.rating >= 4.8 ? '★' : '☆'}</span>
+          <span class="tc-rating-num">${th.rating} · ${th.reviews}${L.ordersLabel}</span>
+          <span class="tc-dist">${th.dist}</span>
+        </div>
+        <div class="tc-tags">
+          ${(lang==='en'?th.tagEn:lang==='th'?th.tagTh:th.tags).map(tag => `<span class="tc-tag">${tag}</span>`).join('')}
+        </div>
+        <div class="tc-actions">
+          <button class="tc-btn-outline" onclick="event.stopPropagation();showToast('${lang==='zh'?'查看技師詳情':lang==='en'?'View profile':'ดูโปรไฟล์'}')">
+            ${lang==='zh'?'技師資料':lang==='en'?'Profile':'โปรไฟล์'}
+          </button>
+          <button class="tc-btn-fill" onclick="event.stopPropagation();openBooking(${th.id})">
+            ${lang==='zh'?'立即預約':lang==='en'?'Book Now':'จองเลย'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── PROGRESS STEPS ─── */
+function renderProgressSteps() {
+  const L = i18n[lang] || i18n.zh;
+  const steps = L.steps || ['訂單確認','技師前往','服務進行中','服務完成'];
+  const times = L.stepsTimes || ['14:00','14:05','',''];
+  const descs = L.stepsDescs || ['','','',''];
+  const activeIdx = 1; // currently at step 1
+
+  const container = document.getElementById('progress-steps');
+  if (!container) return;
+  container.innerHTML = steps.map((step, i) => `
+    <div class="step-row">
+      <div class="step-icon-col">
+        <div class="step-icon ${i < activeIdx ? 'done' : i === activeIdx ? 'active' : 'pending'}">
+          ${i < activeIdx ? '✓' : i + 1}
+        </div>
+        ${i < steps.length - 1 ? `<div class="step-line ${i < activeIdx ? 'done' : 'pending'}"></div>` : ''}
+      </div>
+      <div class="step-content">
+        <div class="step-title">${step}</div>
+        ${times[i] ? `<div class="step-time">${times[i]}</div>` : ''}
+        <div class="step-desc">${descs[i]}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── ORDER LIST ─── */
+function renderOrderList(filter) {
+  const L = i18n[lang] || i18n.zh;
+  const container = document.getElementById('order-list-content');
+  if (!container) return;
+
+  let filtered = orders;
+  if (filter === 'ongoing') filtered = orders.filter(o => o.status === 'ongoing');
+  else if (filter === 'done') filtered = orders.filter(o => o.status === 'done');
+  else if (filter === 'cancelled') filtered = [];
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>${lang==='zh'?'暫無訂單':lang==='en'?'No orders':'ไม่มีคำสั่ง'}</p></div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(o => `
+    <div class="order-list-item" onclick="${o.status==='ongoing'?'goPage(\'page-order\')':'showToast(\''+(lang==='zh'?'訂單已完成':lang==='en'?'Order completed':'คำสั่งเสร็จแล้ว')+'\')'}">
+      <div class="oli-head">
+        <span class="oli-id">${o.id}</span>
+        <span class="oli-chip ${o.status==='ongoing'?'chip-ongoing':'chip-done'}">
+          ${o.status==='ongoing'?L.ongoingChip:L.doneChip}
+        </span>
+      </div>
+      <div class="oli-service">${lang==='en'?o.serviceEn:lang==='th'?o.serviceTh:o.service}</div>
+      <div class="oli-therapist">${o.therapist}</div>
+      <div class="oli-footer">
+        <div class="oli-price">${o.price}</div>
+        <div class="oli-date">${o.date}</div>
+      </div>
+    </div>
+  `).join('') + '<div style="height:16px;"></div>';
+}
+
+/* ─── BANNER ─── */
+function goBanner(idx) {
+  bannerIdx = idx;
+  const track = document.getElementById('banner-track');
+  if (track) track.style.transform = `translateX(-${idx * 100}%)`;
+  document.querySelectorAll('#banner-dots span').forEach((d, i) => {
+    d.className = i === idx ? 'on' : '';
+  });
+}
+function startBannerTimer() {
+  clearInterval(bannerTimer);
+  bannerTimer = setInterval(() => goBanner((bannerIdx + 1) % 3), 3800);
+}
+
+/* ─── PAGE ROUTING ─── */
+function goPage(id, data) {
+  if (id === currentPage) return;
+  pageStack.push(currentPage);
+  const prev = document.getElementById(currentPage);
+  const next = document.getElementById(id);
+  if (!next) return;
+  currentPage = id;
+  prev.classList.remove('active');
+  next.style.transform = 'translateX(100%)';
+  next.classList.add('active');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { next.style.transform = ''; });
+  });
+  if (data) setupBooking(data);
+  // scroll to top
+  const sc = next.querySelector('.page-content');
+  if (sc) sc.scrollTop = 0;
+}
+
+function goBack() {
+  if (pageStack.length === 0) return;
+  const prev = pageStack.pop();
+  const cur = document.getElementById(currentPage);
+  const target = document.getElementById(prev);
+  if (!target) return;
+  cur.style.transform = 'translateX(100%)';
+  setTimeout(() => cur.classList.remove('active'), 300);
+  target.classList.add('active');
+  target.style.transform = '';
+  currentPage = prev;
+}
+
+/* ─── NAVIGATION ─── */
+function switchNav(dest, btn) {
+  document.querySelectorAll('#nav-user .nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (dest === 'orders') goPage('page-orders');
+  else if (dest === 'profile') goPage('page-profile');
+  else if (dest === 'home') goPage('page-home');
+}
+function switchNavOrders(dest) {
+  if (dest === 'home') goPage('page-home');
+  else if (dest === 'profile') goPage('page-profile');
+}
+function switchNavProfile(dest) {
+  if (dest === 'home') goPage('page-home');
+  else if (dest === 'orders') goPage('page-orders');
+}
+
+/* ─── BOOKING ─── */
+function openBooking(id) {
+  const th = therapists.find(t => t.id === id) || therapists[0];
+  const bname = document.getElementById('book-therapist-name');
+  if (bname) bname.textContent = lang==='en'?th.nameEn:lang==='th'?th.nameTh:th.name;
+  goPage('page-book');
+}
+function selectService(el, svcId, price) {
+  document.querySelectorAll('.service-item').forEach(i => {
+    i.classList.remove('selected');
+    i.querySelector('.si-radio').classList.remove('checked');
+    i.querySelector('.si-radio').innerHTML = '';
+  });
+  el.classList.add('selected');
+  el.querySelector('.si-radio').classList.add('checked');
+  selectedPrice = parseInt(el.dataset.price || '150000');
+  const fee = Math.round(selectedPrice * 0.15);
+  const totalEl = document.getElementById('bf-total');
+  const feeEl = document.getElementById('bf-fee');
+  if (totalEl) totalEl.textContent = '₭' + selectedPrice.toLocaleString();
+  if (feeEl) feeEl.textContent = '₭' + fee.toLocaleString() + ' (15%)';
+}
+function selectTime(el) {
+  if (el.classList.contains('full')) return;
+  document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function confirmBooking() {
+  showToast(lang==='zh'?'預約成功！正在尋找技師...' : lang==='en'?'Booked! Finding therapist...' : 'จองสำเร็จ! กำลังหานักนวด...');
+  setTimeout(() => goPage('page-order'), 1200);
+}
+function setupBooking(data) {}
+
+/* ─── THERAPIST TOGGLE ─── */
+function toggleOnline() {
+  isOnline = !isOnline;
+  const sw = document.getElementById('toggle-sw');
+  const sub = document.getElementById('toggle-sub');
+  const L = i18n[lang] || i18n.zh;
+  if (sw) { sw.className = 'toggle-sw ' + (isOnline ? 'on' : 'off'); }
+  if (sub) {
+    sub.textContent = isOnline ? L.toggleOnSub : L.toggleOffSub;
+    sub.className = 'sub ' + (isOnline ? 'on' : 'off');
+  }
+  showToast(isOnline ? (lang==='zh'?'已開始接單':lang==='en'?'Now accepting orders':'รับงานแล้ว') : (lang==='zh'?'已暫停接單':lang==='en'?'Stopped accepting':'หยุดรับงาน'));
+}
+
+/* ─── PROFILE MODE SWITCH ─── */
+function switchMode(mode, btn) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (mode === 'therapist') { setTimeout(() => goPage('page-therapist'), 300); }
+  else if (mode === 'admin') { setTimeout(() => goPage('page-admin'), 300); }
+}
+
+/* ─── FILTER ─── */
+function filterCat(cat) { goPage('page-services'); }
+
+/* ─── SERVICE LIST FILTER ─── */
+function filterSvcTab(tab, cat) {
+  document.querySelectorAll('#svc-filter-tabs .filter-tab').forEach(t => t.classList.remove('on'));
+  if (tab) tab.classList.add('on');
+  const cards = document.querySelectorAll('#svc-list-content .svc-card');
+  cards.forEach(c => {
+    if (cat === 'all' || c.dataset.cat === cat) c.style.display = 'flex';
+    else c.style.display = 'none';
+  });
+}
+
+/* ─── REVIEW STARS ─── */
+let reviewRating = 0;
+function setReviewStar(idx) {
+  reviewRating = idx + 1;
+  const stars = document.querySelectorAll('#review-stars .star');
+  stars.forEach((s, i) => { s.textContent = i <= idx ? '★' : '☆'; s.className = i <= idx ? 'star on' : 'star'; });
+}
+function filterOrders(filter, btn) {
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderOrderList(filter);
+}
+
+/* ─── FEE PAGE ─── */
+function simulateUpload() {
+  document.getElementById('upload-box').style.display = 'none';
+  document.getElementById('uploaded-preview').style.display = 'flex';
+  uploaded = true;
+  showToast(lang==='zh'?'截圖已上傳':lang==='en'?'Screenshot uploaded':'อัปโหลดแล้ว');
+}
+function removeUpload() {
+  document.getElementById('upload-box').style.display = 'block';
+  document.getElementById('uploaded-preview').style.display = 'none';
+  uploaded = false;
+}
+function submitFee() {
+  if (!uploaded) {
+    showToast(lang==='zh'?'請先上傳轉帳截圖':lang==='en'?'Please upload receipt first':'กรุณาอัปโหลดหลักฐานก่อน');
+    return;
+  }
+  showToast(lang==='zh'?'提交成功！等待後台確認...' : lang==='en'?'Submitted! Awaiting confirmation...' : 'ส่งแล้ว! รอการยืนยัน...');
+  setTimeout(() => goBack(), 1500);
+}
+
+/* ─── COPY ─── */
+function copyText(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast(lang==='zh'?'已複製':lang==='en'?'Copied!':'คัดลอกแล้ว'));
+  } else {
+    const el = document.createElement('textarea');
+    el.value = text; document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el);
+    showToast(lang==='zh'?'已複製':lang==='en'?'Copied!':'คัดลอกแล้ว');
+  }
+}
+
+/* ─── TOAST ─── */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ─── INIT ─── */
+document.addEventListener('DOMContentLoaded', () => {
+  applyLang();
+  startBannerTimer();
+  renderProgressSteps();
+  renderOrderList('all');
+});
+</script>
+</body>
+</html>
