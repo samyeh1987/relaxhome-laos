@@ -735,7 +735,7 @@ hr.light { border: none; border-top: 1px solid #f0f0f0; margin: 0 16px; }
 .set-item {
   margin: 0 16px; background: #fff; padding: 14px 16px;
   display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.15s;
 }
 .set-item:last-child { border-bottom: none; border-radius: 0 0 12px 12px; }
 .set-item:first-child { border-radius: 12px 12px 0 0; }
@@ -978,7 +978,7 @@ hr.light { border: none; border-top: 1px solid #f0f0f0; margin: 0 16px; }
     <!-- Therapist List -->
     <div class="section-title">
       <h3 id="nearby-title">附近技師</h3>
-      <a id="see-all">查看全部</a>
+      <a id="see-all" onclick="goPage('page-services')" style="cursor:pointer;">查看全部</a>
     </div>
     <div class="therapist-list" id="therapist-list">
       <!-- rendered by JS -->
@@ -1224,8 +1224,21 @@ hr.light { border: none; border-top: 1px solid #f0f0f0; margin: 0 16px; }
     </div>
   </div>
 
-  <!-- Back button -->
-  <button onclick="goPage('page-home')" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid var(--p);color:var(--p);font-size:14px;font-weight:700;padding:12px 28px;border-radius:25px;cursor:pointer;box-shadow:var(--shadow-lg);z-index:50;" id="back-home-btn">← 返回首頁</button>
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="goPage('page-home')">
+      <span class="nav-icon">🏠</span>
+      <span id="nav-home-l4">首頁</span>
+    </button>
+    <button class="nav-item" onclick="goPage('page-orders')">
+      <span class="nav-icon">📋</span>
+      <span id="nav-orders-l4">訂單</span>
+    </button>
+    <button class="nav-item" onclick="goPage('page-profile')">
+      <span class="nav-icon">👤</span>
+      <span id="nav-profile-l4">我的</span>
+    </button>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════
@@ -2119,31 +2132,31 @@ hr.light { border: none; border-top: 1px solid #f0f0f0; margin: 0 16px; }
   </div>
   <div class="sub-page-content">
     <div class="set-section">
-      <div class="set-item">
+      <div class="set-item" onclick="goPage('page-notify')">
         <div class="si-left"><span style="font-size:18px;">🔔</span><span class="si-label" id="set-notify">通知設定</span></div>
         <span class="si-arrow-s">›</span>
       </div>
-      <div class="set-item">
+      <div class="set-item" onclick="cycleLanguage()">
         <div class="si-left"><span style="font-size:18px;">🌐</span><span class="si-label" id="set-lang">語言</span></div>
         <span class="si-val" id="set-lang-val">中文</span>
       </div>
     </div>
     <div class="set-section">
-      <div class="set-item">
+      <div class="set-item" onclick="showToast('隱私設定')">
         <div class="si-left"><span style="font-size:18px;">🔒</span><span class="si-label" id="set-privacy">隱私設定</span></div>
         <span class="si-arrow-s">›</span>
       </div>
-      <div class="set-item">
+      <div class="set-item" onclick="clearCache()">
         <div class="si-left"><span style="font-size:18px;">📱</span><span class="si-label" id="set-cache">清除緩存</span></div>
-        <span class="si-val">12.5 MB</span>
+        <span class="si-val" id="cache-size">12.5 MB</span>
       </div>
     </div>
     <div class="set-section">
-      <div class="set-item">
+      <div class="set-item" onclick="showToast('關於舒摩到家')">
         <div class="si-left"><span style="font-size:18px;">ℹ️</span><span class="si-label" id="set-about">關於我們</span></div>
         <span class="si-arrow-s">›</span>
       </div>
-      <div class="set-item">
+      <div class="set-item" onclick="confirmLogout()">
         <div class="si-left"><span style="font-size:18px;">👋</span><span class="si-label" id="set-logout">退出登入</span></div>
         <span class="si-arrow-s">›</span>
       </div>
@@ -2791,9 +2804,9 @@ function applyLang() {
   if (document.getElementById('b3-title')) document.getElementById('b3-title').innerHTML = L.b3title.replace('\n','<br>');
 
   // Nav labels
-  ['nav-home-label','nav-home-l2','nav-home-l3'].forEach(id => set(id, L.navHome));
-  ['nav-orders-label','nav-orders-l2','nav-orders-l3'].forEach(id => set(id, L.navOrders));
-  ['nav-profile-label','nav-profile-l2','nav-profile-l3'].forEach(id => set(id, L.navProfile));
+  ['nav-home-label','nav-home-l2','nav-home-l3','nav-home-l4'].forEach(id => set(id, L.navHome));
+  ['nav-orders-label','nav-orders-l2','nav-orders-l3','nav-orders-l4'].forEach(id => set(id, L.navOrders));
+  ['nav-profile-label','nav-profile-l2','nav-profile-l3','nav-profile-l4'].forEach(id => set(id, L.navProfile));
 
   // Booking
   set('bk-service-title', L.bkServiceTitle); set('bk-time-title', L.bkTimeTitle); set('bk-addr-title', L.bkAddrTitle);
@@ -3115,10 +3128,12 @@ function switchNav(dest, btn) {
 function switchNavOrders(dest) {
   if (dest === 'home') goPage('page-home');
   else if (dest === 'profile') goPage('page-profile');
+  else if (dest === 'orders') {} /* already on this page */
 }
 function switchNavProfile(dest) {
   if (dest === 'home') goPage('page-home');
   else if (dest === 'orders') goPage('page-orders');
+  else if (dest === 'profile') {} /* already on this page */
 }
 
 /* ─── BOOKING ─── */
@@ -3222,6 +3237,27 @@ function submitFee() {
   }
   showToast(lang==='zh'?'提交成功！等待後台確認...' : lang==='en'?'Submitted! Awaiting confirmation...' : 'ส่งแล้ว! รอการยืนยัน...');
   setTimeout(() => goBack(), 1500);
+}
+
+/* ─── SETTINGS HELPERS ─── */
+function cycleLanguage() {
+  const langs = ['zh', 'en', 'th'];
+  const idx = langs.indexOf(lang);
+  const next = langs[(idx + 1) % 3];
+  lang = next;
+  applyLang();
+  const el = document.getElementById('set-lang-val');
+  if (el) el.textContent = lang==='zh'?'中文':lang==='en'?'English':'ภาษาไทย';
+  showToast(lang==='zh'?'語言已切換為中文':lang==='en'?'Language set to English':'เปลี่ยนเป็นภาษาไทยแล้ว');
+}
+function clearCache() {
+  const el = document.getElementById('cache-size');
+  if (el) el.textContent = '0 MB';
+  showToast(lang==='zh'?'緩存已清除':lang==='en'?'Cache cleared':'เคลียร์แคชแล้ว');
+}
+function confirmLogout() {
+  showToast(lang==='zh'?'已退出登入':lang==='en'?'Logged out':'ออกจากระบบแล้ว');
+  setTimeout(() => goPage('page-home'), 1200);
 }
 
 /* ─── COPY ─── */
