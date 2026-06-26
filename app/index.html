@@ -843,6 +843,67 @@ hr.light { border: none; border-top: 1px solid #f0f0f0; margin: 0 16px; }
 .svc-card .svc-price b { color: var(--p); font-size: 16px; }
 .svc-card .svc-arrow { color: #ccc; font-size: 20px; }
 
+/* ═══════════════════════════════════════════════════
+   SERVICE LIST REDESIGN
+════════════════════════════════════════════════════ */
+.svc-filter-bar {
+  background: #fff; padding: 10px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  flex-shrink: 0; position: sticky; top:0; z-index:5;
+}
+.svc-filter-scroll {
+  display: flex; gap: 6px; overflow-x: auto;
+  scrollbar-width: none; -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+.svc-filter-scroll::-webkit-scrollbar { display: none; }
+.svc-filter-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 8px 14px; border-radius: 22px;
+  border: 1.5px solid #eee; background: #fff;
+  font-size: 13px; font-weight: 600; color: #6B7280;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.svc-filter-chip::before {
+  content: ''; width: 8px; height: 8px; border-radius: 50%;
+  background: #ccc; flex-shrink: 0;
+}
+.svc-filter-chip[data-filter="lao"]::before { background: #F97316; }
+.svc-filter-chip[data-filter="thai"]::before { background: #6366F1; }
+.svc-filter-chip[data-filter="oil"]::before { background: #10B981; }
+.svc-filter-chip[data-filter="foot"]::before { background: #F59E0B; }
+.svc-filter-chip[data-filter="neck"]::before { background: #EC4899; }
+.svc-filter-chip.on {
+  background: var(--p); color: #fff; border-color: var(--p);
+}
+.svc-filter-chip.on::before { background: rgba(255,255,255,0.7); }
+
+.svc-grid {
+  flex: 1; overflow-y: auto; padding: 12px 12px 24px;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+  align-content: start;
+}
+.svc-grid-item {
+  background: #fff; border-radius: 16px; overflow: hidden;
+  cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  display: flex; flex-direction: column;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.svc-grid-item:active { transform: scale(0.96); }
+.svc-grid-banner {
+  height: 68px; display: flex; align-items: center; justify-content: center;
+  font-size: 34px;
+}
+.svc-grid-body {
+  padding: 12px 14px 16px; flex: 1;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.svc-grid-body h3 { font-size: 14px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+.svc-grid-body p { font-size: 11px; color: #6B7280; margin: 0; line-height: 1.4; }
+.svc-grid-price { font-size: 12px; color: var(--text-s); margin-top: 5px; }
+.svc-grid-price b { color: var(--p); font-size: 14px; font-weight: 700; }
+
 /* Review page */
 .review-section { padding: 16px; text-align: center; }
 .review-section .rs-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
@@ -1889,77 +1950,72 @@ hr.light { border: none; border-top: 1px solid #f0f0f0; margin: 0 16px; }
     <button class="back-btn" onclick="goPage('page-home')">←</button>
     <span id="svclist-title">全部服務</span>
   </div>
-  <div class="filter-tabs" id="svc-filter-tabs">
-    <div class="filter-tab on" onclick="filterSvcTab(this,'all')" id="ft-all">全部</div>
-    <div class="filter-tab" onclick="filterSvcTab(this,'lao')" id="ft-lao">寮式按摩</div>
-    <div class="filter-tab" onclick="filterSvcTab(this,'thai')" id="ft-thai">泰式按摩</div>
-    <div class="filter-tab" onclick="filterSvcTab(this,'oil')" id="ft-oil">精油按摩</div>
-    <div class="filter-tab" onclick="filterSvcTab(this,'foot')" id="ft-foot">腳底按摩</div>
-    <div class="filter-tab" onclick="filterSvcTab(this,'neck')" id="ft-neck">頭頸肩背</div>
+  <div class="svc-filter-bar">
+    <div class="svc-filter-scroll" id="svc-filter-tabs">
+      <div class="svc-filter-chip on" data-filter="all" onclick="filterSvcTab(this,'all')" id="ft-all">全部</div>
+      <div class="svc-filter-chip" data-filter="lao" onclick="filterSvcTab(this,'lao')" id="ft-lao">寮式按摩</div>
+      <div class="svc-filter-chip" data-filter="thai" onclick="filterSvcTab(this,'thai')" id="ft-thai">泰式按摩</div>
+      <div class="svc-filter-chip" data-filter="oil" onclick="filterSvcTab(this,'oil')" id="ft-oil">精油按摩</div>
+      <div class="svc-filter-chip" data-filter="foot" onclick="filterSvcTab(this,'foot')" id="ft-foot">腳底按摩</div>
+      <div class="svc-filter-chip" data-filter="neck" onclick="filterSvcTab(this,'neck')" id="ft-neck">頭頸肩背</div>
+    </div>
   </div>
-  <div class="sub-page-content" id="svc-list-content">
-    <div class="svc-card" onclick="goPage('page-book')" data-cat="lao">
-      <div class="svc-icon" style="background:#FFF0EB;">🤲</div>
-      <div class="svc-info">
-        <div class="svc-name" id="svc1-name">寮式傳統按摩</div>
-        <div class="svc-desc" id="svc1-desc">老撾傳統手法，舒筋活絡</div>
-        <div class="svc-price" id="svc1-price">60分鐘 · <b>₭150,000</b>起</div>
+  <div class="svc-grid" id="svc-list-content">
+    <div class="svc-grid-item" data-cat="lao" onclick="goPage('page-book')">
+      <div class="svc-grid-banner" style="background:linear-gradient(135deg,#FFF0EB,#FFE4D6);">🤲</div>
+      <div class="svc-grid-body">
+        <h3 id="svc1-name">寮式傳統按摩</h3>
+        <p id="svc1-desc">老撾傳統手法，舒筋活絡</p>
+        <div class="svc-grid-price" id="svc1-price">60分鐘 · <b>₭150,000</b>起</div>
       </div>
-      <div class="svc-arrow">›</div>
     </div>
-    <div class="svc-card" onclick="goPage('page-book')" data-cat="lao">
-      <div class="svc-icon" style="background:#FFF0EB;">🤲</div>
-      <div class="svc-info">
-        <div class="svc-name" id="svc1b-name">寮式傳統按摩</div>
-        <div class="svc-desc" id="svc1b-desc">深度放鬆，消除全身疲勞</div>
-        <div class="svc-price" id="svc1b-price">90分鐘 · <b>₭220,000</b></div>
+    <div class="svc-grid-item" data-cat="lao" onclick="goPage('page-book')">
+      <div class="svc-grid-banner" style="background:linear-gradient(135deg,#FFEDD5,#FED7AA);">🤲</div>
+      <div class="svc-grid-body">
+        <h3 id="svc1b-name">寮式傳統按摩</h3>
+        <p id="svc1b-desc">深度放鬆，消除全身疲勞</p>
+        <div class="svc-grid-price" id="svc1b-price">90分鐘 · <b>₭220,000</b></div>
       </div>
-      <div class="svc-arrow">›</div>
     </div>
-    <div class="svc-card" onclick="goPage('page-book')" data-cat="thai">
-      <div class="svc-icon" style="background:#F0F4FF;">🙏</div>
-      <div class="svc-info">
-        <div class="svc-name" id="svc2-name">泰式按摩</div>
-        <div class="svc-desc" id="svc2-desc">傳統泰式伸展，活絡筋骨</div>
-        <div class="svc-price" id="svc2-price">60分鐘 · <b>₭130,000</b>起</div>
+    <div class="svc-grid-item" data-cat="thai" onclick="goPage('page-book')">
+      <div class="svc-grid-banner" style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);">🙏</div>
+      <div class="svc-grid-body">
+        <h3 id="svc2-name">泰式按摩</h3>
+        <p id="svc2-desc">傳統泰式伸展，活絡筋骨</p>
+        <div class="svc-grid-price" id="svc2-price">60分鐘 · <b>₭130,000</b>起</div>
       </div>
-      <div class="svc-arrow">›</div>
     </div>
-    <div class="svc-card" onclick="goPage('page-book')" data-cat="thai">
-      <div class="svc-icon" style="background:#F0F4FF;">🙏</div>
-      <div class="svc-info">
-        <div class="svc-name" id="svc2b-name">泰式按摩</div>
-        <div class="svc-desc" id="svc2b-desc">深度泰式按壓，恢復柔韌性</div>
-        <div class="svc-price" id="svc2b-price">90分鐘 · <b>₭200,000</b></div>
+    <div class="svc-grid-item" data-cat="thai" onclick="goPage('page-book')">
+      <div class="svc-grid-banner" style="background:linear-gradient(135deg,#E0E7FF,#C7D2FE);">🙏</div>
+      <div class="svc-grid-body">
+        <h3 id="svc2b-name">泰式按摩</h3>
+        <p id="svc2b-desc">深度泰式按壓，恢復柔韌性</p>
+        <div class="svc-grid-price" id="svc2b-price">90分鐘 · <b>₭200,000</b></div>
       </div>
-      <div class="svc-arrow">›</div>
     </div>
-    <div class="svc-card" onclick="goPage('page-book')" data-cat="oil">
-      <div class="svc-icon" style="background:#F0FFF4;">🌿</div>
-      <div class="svc-info">
-        <div class="svc-name" id="svc3-name">精油按摩</div>
-        <div class="svc-desc" id="svc3-desc">天然香薰精油，滋潤肌膚放鬆</div>
-        <div class="svc-price" id="svc3-price">60分鐘 · <b>₭150,000</b></div>
+    <div class="svc-grid-item" data-cat="oil" onclick="goPage('page-book')">
+      <div class="svc-grid-banner" style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);">🌿</div>
+      <div class="svc-grid-body">
+        <h3 id="svc3-name">精油按摩</h3>
+        <p id="svc3-desc">天然香薰精油，滋潤肌膚放鬆</p>
+        <div class="svc-grid-price" id="svc3-price">60分鐘 · <b>₭150,000</b></div>
       </div>
-      <div class="svc-arrow">›</div>
     </div>
-    <div class="svc-card" onclick="goPage('page-book')" data-cat="foot">
-      <div class="svc-icon" style="background:#FFF8E1;">🦶</div>
-      <div class="svc-info">
-        <div class="svc-name" id="svc4-name">腳底按摩</div>
-        <div class="svc-desc" id="svc4-desc">刺激足部穴位，緩解腿部疲勞</div>
-        <div class="svc-price" id="svc4-price">60分鐘 · <b>₭80,000</b></div>
+    <div class="svc-grid-item" data-cat="foot" onclick="goPage('page-book')">
+      <div class="svc-grid-banner" style="background:linear-gradient(135deg,#FFFBEB,#FEF3C7);">🦶</div>
+      <div class="svc-grid-body">
+        <h3 id="svc4-name">腳底按摩</h3>
+        <p id="svc4-desc">刺激足部穴位，緩解腿部疲勞</p>
+        <div class="svc-grid-price" id="svc4-price">60分鐘 · <b>₭80,000</b></div>
       </div>
-      <div class="svc-arrow">›</div>
     </div>
-    <div class="svc-card" onclick="goPage('page-book')" data-cat="neck">
-      <div class="svc-icon" style="background:#F5E6FF;">💆</div>
-      <div class="svc-info">
-        <div class="svc-name" id="svc5-name">頭頸肩背按摩</div>
-        <div class="svc-desc" id="svc5-desc">針對辦公族，解除頸肩酸痛</div>
-        <div class="svc-price" id="svc5-price">45分鐘 · <b>₭90,000</b></div>
+    <div class="svc-grid-item" data-cat="neck" onclick="goPage('page-book')">
+      <div class="svc-grid-banner" style="background:linear-gradient(135deg,#FDF2F8,#FCE7F3);">💆</div>
+      <div class="svc-grid-body">
+        <h3 id="svc5-name">頭頸肩背按摩</h3>
+        <p id="svc5-desc">針對辦公族，解除頸肩酸痛</p>
+        <div class="svc-grid-price" id="svc5-price">45分鐘 · <b>₭90,000</b></div>
       </div>
-      <div class="svc-arrow">›</div>
     </div>
   </div>
 </div>
@@ -3191,14 +3247,20 @@ function switchMode(mode, btn) {
 }
 
 /* ─── FILTER ─── */
-function filterCat(cat) { goPage('page-services'); }
+function filterCat(cat) {
+  goPage('page-services');
+  setTimeout(() => {
+    const chip = document.querySelector('#svc-filter-tabs [data-filter="' + cat + '"]');
+    if (chip) filterSvcTab(chip, cat);
+  }, 350);
+}
 
 /* ─── SERVICE LIST FILTER ─── */
 function filterSvcTab(tab, cat) {
-  document.querySelectorAll('#svc-filter-tabs .filter-tab').forEach(t => t.classList.remove('on'));
-  if (tab) tab.classList.add('on');
-  const cards = document.querySelectorAll('#svc-list-content .svc-card');
-  cards.forEach(c => {
+  document.querySelectorAll('#svc-filter-tabs .svc-filter-chip').forEach(t => t.classList.remove('on'));
+  if (tab) { tab.classList.add('on'); tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+  const items = document.querySelectorAll('#svc-list-content .svc-grid-item');
+  items.forEach(c => {
     if (cat === 'all' || c.dataset.cat === cat) c.style.display = 'flex';
     else c.style.display = 'none';
   });
