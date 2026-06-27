@@ -10,3 +10,7 @@ Thumbs.db
 .idea/
 *.pyc
 __pycache__/
+relaxhome.db
+server/relaxhome.db
+.vercel/
+server/node_modules/

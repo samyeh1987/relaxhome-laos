@@ -1342,9 +1342,9 @@ hr.light { border: none; border-top: 1px solid #f0f0f0; margin: 0 16px; }
 ════════════════════════════════════════════════════ -->
 <div id="page-profile" class="page">
   <div class="profile-hero">
-    <div class="profile-avatar">😊</div>
-    <div class="profile-name" id="profile-name-text">李小姐</div>
-    <div class="profile-sub">📍 ວຽງຈັນ, Laos</div>
+    <div class="profile-avatar" id="prof-avatar-img">😊</div>
+    <div class="profile-name" id="profile-name-text" id="prof-name">李小姐</div>
+    <div class="profile-sub" id="prof-phone">📍 ວຽງຈັນ, Laos</div>
     <div class="profile-stats">
       <div class="ps-item"><div class="v">12</div><div class="l" id="ps-orders">次訂單</div></div>
       <div class="ps-item"><div class="v">4.9</div><div class="l" id="ps-rating">評分</div></div>
@@ -1364,6 +1364,19 @@ hr.light { border: none; border-top: 1px solid #f0f0f0; margin: 0 16px; }
     </div>
 
     <!-- Menu -->
+    <div style="padding:0 16px 8px;">
+      <div id="login-status-banner" onclick="apiUser ? doLogout() : showLoginModal('user')"
+        style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,var(--p),#d97706);color:#fff;padding:14px 16px;border-radius:14px;cursor:pointer;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:22px;">👤</div>
+          <div>
+            <div id="login-status-name" style="font-weight:700;font-size:15px;">點擊登入</div>
+            <div id="login-status-sub" style="font-size:12px;opacity:0.85;">登入後享受完整服務</div>
+          </div>
+        </div>
+        <div style="font-size:18px;">›</div>
+      </div>
+    </div>
     <div class="menu-section" style="margin-top:12px;">
       <div class="menu-item" onclick="goPage('page-coupon')">
         <div class="menu-icon" style="background:#FFF0EB;">🎁</div>
@@ -3348,7 +3361,457 @@ document.addEventListener('DOMContentLoaded', () => {
   startBannerTimer();
   renderProgressSteps();
   renderOrderList('all');
+  apiInit();
 });
+
+/* ═══════════════════════════════════════════════════
+   API CLIENT LAYER
+   ─ all real API calls go here
+   ─ falls back to mock data if server unreachable
+════════════════════════════════════════════════════ */
+
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? ''
+  : 'https://relaxhome-api.onrender.com'; // production backend (deploy separately)
+
+let apiToken = localStorage.getItem('rh_token') || '';
+let apiUser  = JSON.parse(localStorage.getItem('rh_user') || 'null');
+let selectedTherapistId = null;
+let selectedServiceId   = null;
+let selectedServicePrice = 0;
+let apiTherapistList = [];
+
+async function apiFetch(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (apiToken) headers['Authorization'] = 'Bearer ' + apiToken;
+  try {
+    const res = await fetch(API_BASE + path, { ...opts, headers: { ...headers, ...(opts.headers || {}) } });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  } catch (e) {
+    console.warn('[API] ' + path, e.message);
+    return null;
+  }
+}
+
+/* ── AUTH ── */
+async function apiLogin(phone, password, role) {
+  const data = await apiFetch('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ phone, password, role })
+  });
+  if (!data) return null;
+  apiToken = data.token;
+  apiUser  = data.user;
+  localStorage.setItem('rh_token', apiToken);
+  localStorage.setItem('rh_user', JSON.stringify(apiUser));
+  return data.user;
+}
+
+async function apiRegister(phone, password, name) {
+  const data = await apiFetch('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ phone, password, name })
+  });
+  if (!data) return null;
+  apiToken = data.token;
+  apiUser  = data.user;
+  localStorage.setItem('rh_token', apiToken);
+  localStorage.setItem('rh_user', JSON.stringify(apiUser));
+  return data.user;
+}
+
+function apiLogout() {
+  apiToken = '';
+  apiUser  = null;
+  localStorage.removeItem('rh_token');
+  localStorage.removeItem('rh_user');
+}
+
+/* ── THERAPISTS ── */
+async function apiLoadTherapists(category) {
+  const url = '/api/therapists' + (category && category !== 'all' ? '?category=' + category : '');
+  const data = await apiFetch(url);
+  if (data && data.length > 0) {
+    apiTherapistList = data;
+    renderApiTherapists(data);
+  }
+}
+
+function renderApiTherapists(list) {
+  const container = document.getElementById('therapist-list');
+  if (!container) return;
+  container.innerHTML = list.map(th => `
+    <div class="therapist-card" onclick="openApiTherapistDetail(${th.id})">
+      <div class="tc-img" style="background: linear-gradient(135deg,#ff9a8b44,#a8edea44); display:flex;align-items:center;justify-content:center;min-height:110px;font-size:52px;">
+        ${th.avatar ? `<img src="${th.avatar}" style="width:100%;height:100%;object-fit:cover;">` : '💆‍♀️'}
+        <div class="tc-avail"><div class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;margin-right:4px;"></div>${lang==='zh'?'可預約':lang==='en'?'Available':'ຮັບສັ່ງ'}</div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-top">
+          <div class="tc-name">${th.name}</div>
+          <div class="tc-price">₭${(th.services[0]?.price || 0).toLocaleString()}</div>
+        </div>
+        <div class="tc-rating">
+          <span class="tc-stars">${'★'.repeat(Math.round(th.rating))}${'☆'.repeat(5-Math.round(th.rating))}</span>
+          <span class="tc-rating-num">${th.rating} · ${th.review_count}${lang==='zh'?'次':lang==='en'?' orders':' ສັ່ງ'}</span>
+          <span class="tc-dist">${th.experience_years}${lang==='zh'?'年经验':lang==='en'?'yr exp':' ປີ'}</span>
+        </div>
+        <div class="tc-tags">
+          ${th.services.slice(0,3).map(s => `<span class="tc-tag">${s.name_zh}</span>`).join('')}
+        </div>
+        <div class="tc-actions">
+          <button class="tc-book-btn" onclick="event.stopPropagation();apiQuickBook(${th.id},${th.services[0]?.id||0},${th.services[0]?.price||0})">${lang==='zh'?'立即預約':lang==='en'?'Book Now':'ຈອງ'}</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openApiTherapistDetail(therapistId) {
+  const th = apiTherapistList.find(t => t.id === therapistId);
+  selectedTherapistId = therapistId;
+  if (th) {
+    // Fill the therapist detail page with real data
+    const nameEl = document.getElementById('tdetail-name');
+    const shopEl = document.getElementById('tdetail-shop');
+    const ratingEl = document.getElementById('tdetail-rating');
+    const reviewEl = document.getElementById('tdetail-reviews');
+    const bioEl = document.getElementById('tdetail-bio');
+    if (nameEl) nameEl.textContent = th.name;
+    if (shopEl) shopEl.textContent = th.shop_name || '';
+    if (ratingEl) ratingEl.textContent = th.rating;
+    if (reviewEl) reviewEl.textContent = th.review_count + (lang==='zh'?'條評價':' reviews');
+    if (bioEl) bioEl.textContent = th.bio || '';
+
+    // Fill services list
+    const svcEl = document.getElementById('tdetail-services');
+    if (svcEl && th.services) {
+      svcEl.innerHTML = th.services.map(s => `
+        <div class="svc-item" onclick="apiQuickBook(${th.id},${s.id},${s.price})" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fff;border-bottom:1px solid #f0f0f0;cursor:pointer;">
+          <div>
+            <div style="font-weight:600;font-size:15px;">${s.name_zh}</div>
+            <div style="color:#9ca3af;font-size:13px;">${s.duration}${lang==='zh'?'分鐘':lang==='en'?' min':' ນທ'} · ${s.desc_zh || ''}</div>
+          </div>
+          <div style="font-weight:700;color:var(--p);font-size:15px;">₭${s.price.toLocaleString()}</div>
+        </div>
+      `).join('');
+    }
+  }
+  goPage('page-tdetail');
+}
+
+function apiQuickBook(therapistId, serviceId, price) {
+  selectedTherapistId = therapistId;
+  selectedServiceId   = serviceId;
+  selectedServicePrice = price;
+  const th = apiTherapistList.find(t => t.id === therapistId);
+  if (th) {
+    const bname = document.getElementById('book-therapist-name');
+    if (bname) bname.textContent = th.name;
+    const totalEl = document.getElementById('bf-total');
+    const feeEl = document.getElementById('bf-fee');
+    if (totalEl) totalEl.textContent = '₭' + price.toLocaleString();
+    if (feeEl) feeEl.textContent = '₭' + Math.round(price * 0.15).toLocaleString() + ' (15%)';
+  }
+  goPage('page-book');
+}
+
+/* ── BOOKING ── */
+async function confirmApiBooking() {
+  if (!apiToken) {
+    showToast(lang==='zh'?'請先登入':'Please login first');
+    return;
+  }
+  if (!selectedTherapistId || !selectedServiceId) {
+    // fallback: use first therapist / service from list
+    if (apiTherapistList.length > 0) {
+      selectedTherapistId = apiTherapistList[0].id;
+      selectedServiceId   = apiTherapistList[0].services[0]?.id;
+      selectedServicePrice = apiTherapistList[0].services[0]?.price || 0;
+    }
+  }
+  const addrEl = document.getElementById('book-address-input') || document.getElementById('book-addr');
+  const address = addrEl ? addrEl.value : '万象市中心';
+  const couponEl = document.getElementById('coupon-input-val');
+  const coupon_code = couponEl ? couponEl.value : '';
+
+  const result = await apiFetch('/api/orders', {
+    method: 'POST',
+    body: JSON.stringify({
+      therapist_id: selectedTherapistId,
+      service_id: selectedServiceId,
+      address: address || '万象市中心',
+      coupon_code: coupon_code || undefined,
+    })
+  });
+
+  if (result) {
+    showToast(lang==='zh'?'預約成功！訂單 ' + result.order_no : 'Booked! Order ' + result.order_no);
+    setTimeout(() => { goPage('page-order'); apiLoadOrders(); }, 1200);
+  } else {
+    showToast(lang==='zh'?'預約失敗，請重試':'Booking failed, please retry');
+  }
+}
+
+/* ── ORDERS ── */
+async function apiLoadOrders() {
+  const data = await apiFetch('/api/orders');
+  if (!data) return;
+  const container = document.getElementById('order-list');
+  if (!container) return;
+  if (data.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:48px 16px;color:#9ca3af;">
+      <div style="font-size:48px;">📋</div>
+      <div style="margin-top:12px;">${lang==='zh'?'暫無訂單':'No orders yet'}</div>
+    </div>`;
+    return;
+  }
+  container.innerHTML = data.map(o => {
+    const statusMap = { pending:'待確認', confirmed:'已確認', in_progress:'服務中', completed:'已完成', cancelled:'已取消' };
+    const statusColor = { pending:'#f59e0b', confirmed:'#3b82f6', in_progress:'#8b5cf6', completed:'#10b981', cancelled:'#ef4444' };
+    const st = o.status;
+    return `<div class="order-card" onclick="viewOrderDetail('${o.order_no}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div>
+          <div style="font-weight:700;font-size:15px;">${o.service_name || ''}</div>
+          <div style="color:#9ca3af;font-size:13px;margin-top:2px;">${o.therapist_name || ''}</div>
+        </div>
+        <span style="background:${statusColor[st] || '#9ca3af'}22;color:${statusColor[st] || '#9ca3af'};padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;">${statusMap[st] || st}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="color:#6b7280;font-size:13px;">${(o.created_at || '').slice(0,16)}</div>
+        <div style="font-weight:700;color:var(--p);">₭${(o.price || 0).toLocaleString()}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function viewOrderDetail(orderNo) {
+  const el = document.getElementById('order-no');
+  if (el) el.textContent = orderNo;
+  goPage('page-order');
+}
+
+/* ── PROFILE ── */
+async function apiLoadProfile() {
+  if (!apiToken) return;
+  const data = await apiFetch('/api/users/me');
+  if (!data) return;
+  const nameEl = document.getElementById('prof-name');
+  const phoneEl = document.getElementById('prof-phone');
+  const profileNameEl = document.getElementById('profile-name-text');
+  if (nameEl) nameEl.textContent = data.name || '';
+  if (profileNameEl) profileNameEl.textContent = data.name || '';
+  if (phoneEl) phoneEl.textContent = data.phone || '';
+  // Update login banner
+  const bannerName = document.getElementById('login-status-name');
+  const bannerSub  = document.getElementById('login-status-sub');
+  if (bannerName) bannerName.textContent = data.name || data.phone;
+  if (bannerSub)  bannerSub.textContent = data.role === 'therapist' ? '技師帳號' : data.role === 'admin' ? '管理員帳號' : '用戶帳號';
+}
+
+function doLogout() {
+  if (!confirm(lang==='zh'?'確認退出登入？':'Confirm logout?')) return;
+  apiLogout();
+  const bannerName = document.getElementById('login-status-name');
+  const bannerSub  = document.getElementById('login-status-sub');
+  if (bannerName) bannerName.textContent = lang==='zh'?'點擊登入':'Tap to Login';
+  if (bannerSub)  bannerSub.textContent = lang==='zh'?'登入後享受完整服務':'Login for full experience';
+  showToast(lang==='zh'?'已退出登入':'Logged out');
+}
+
+/* ── NOTIFICATIONS ── */
+async function apiLoadNotifications() {
+  if (!apiToken) return;
+  const data = await apiFetch('/api/notifications');
+  if (!data) return;
+  const container = document.getElementById('notif-list');
+  if (!container) return;
+  container.innerHTML = data.map(n => `
+    <div style="padding:16px;border-bottom:1px solid #f0f0f0;${n.read ? '' : 'background:#fafbff;'}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-weight:600;font-size:14px;">${lang==='en'?(n.title_en||n.title_zh):n.title_zh}</div>
+        <div style="font-size:11px;color:#9ca3af;">${(n.created_at||'').slice(5,16)}</div>
+      </div>
+      <div style="color:#6b7280;font-size:13px;">${lang==='en'?(n.body_en||n.body_zh):n.body_zh}</div>
+    </div>
+  `).join('') || `<div style="text-align:center;padding:48px;color:#9ca3af;">
+    <div style="font-size:48px;">🔔</div><div style="margin-top:12px;">${lang==='zh'?'暫無通知':'No notifications'}</div>
+  </div>`;
+}
+
+/* ── LOGIN MODAL ── */
+let loginRole = 'user';
+
+function showLoginModal(role) {
+  loginRole = role || 'user';
+  const modal = document.getElementById('login-modal');
+  if (!modal) {
+    // Dynamically create if not exists
+    const div = document.createElement('div');
+    div.id = 'login-modal';
+    div.innerHTML = `
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;" onclick="if(event.target===this)this.remove()">
+        <div style="background:#fff;border-radius:24px 24px 0 0;padding:32px 24px 48px;width:100%;max-width:480px;margin:0 auto;">
+          <div style="text-align:center;margin-bottom:24px;">
+            <div style="font-size:32px;">💆‍♀️</div>
+            <div style="font-size:20px;font-weight:700;margin-top:8px;">${lang==='zh'?'登入舒摩到家':lang==='en'?'Login to RelaxHome':'ເຂົ້າສູ່ລະບົບ'}</div>
+            <div style="font-size:13px;color:#9ca3af;margin-top:4px;">${lang==='zh'?'角色: '+loginRole:'Role: '+loginRole}</div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:13px;color:#374151;font-weight:600;display:block;margin-bottom:6px;">${lang==='zh'?'手機號碼':'Phone Number'}</label>
+            <input id="login-phone" type="tel" placeholder="${lang==='zh'?'020xxxxxxxx':'020xxxxxxxx'}"
+              style="width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:16px;box-sizing:border-box;outline:none;">
+          </div>
+          <div style="margin-bottom:24px;">
+            <label style="font-size:13px;color:#374151;font-weight:600;display:block;margin-bottom:6px;">${lang==='zh'?'密碼':'Password'}</label>
+            <input id="login-password" type="password" placeholder="••••••••"
+              style="width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:16px;box-sizing:border-box;outline:none;">
+          </div>
+          <button onclick="doLogin()" style="width:100%;padding:16px;background:linear-gradient(135deg,var(--p),#d97706);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;">
+            ${lang==='zh'?'登入':'Login'}
+          </button>
+          <div style="text-align:center;margin-top:16px;">
+            <span style="color:#6b7280;font-size:13px;">${lang==='zh'?'還沒有帳號？':'No account?'}</span>
+            <span onclick="showRegisterModal('${loginRole}')" style="color:var(--p);font-weight:600;font-size:13px;cursor:pointer;margin-left:4px;">${lang==='zh'?'立即注冊':'Register'}</span>
+          </div>
+          <div style="text-align:center;margin-top:8px;color:#9ca3af;font-size:12px;">${lang==='zh'?'演示帳號: 02012345678 / 123456':'Demo: 02012345678 / 123456'}</div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(div);
+  } else {
+    modal.style.display = 'flex';
+  }
+}
+
+function showRegisterModal(role) {
+  loginRole = role || 'user';
+  document.getElementById('login-modal')?.remove();
+  const div = document.createElement('div');
+  div.id = 'login-modal';
+  div.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;" onclick="if(event.target===this)this.remove()">
+      <div style="background:#fff;border-radius:24px 24px 0 0;padding:32px 24px 48px;width:100%;max-width:480px;margin:0 auto;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="font-size:20px;font-weight:700;">${lang==='zh'?'注冊新帳號':'Create Account'}</div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <input id="reg-name" type="text" placeholder="${lang==='zh'?'姓名 (可選)':'Name (optional)'}"
+            style="width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:16px;box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:14px;">
+          <input id="reg-phone" type="tel" placeholder="${lang==='zh'?'手機號碼':'Phone Number'}"
+            style="width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:16px;box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:24px;">
+          <input id="reg-password" type="password" placeholder="${lang==='zh'?'密碼 (至少6位)':'Password (min 6 chars)'}"
+            style="width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:16px;box-sizing:border-box;">
+        </div>
+        <button onclick="doRegister()" style="width:100%;padding:16px;background:linear-gradient(135deg,var(--p),#d97706);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;">
+          ${lang==='zh'?'立即注冊':'Register Now'}
+        </button>
+        <div style="text-align:center;margin-top:16px;">
+          <span onclick="showLoginModal('${loginRole}')" style="color:var(--p);font-weight:600;font-size:13px;cursor:pointer;">${lang==='zh'?'已有帳號？登入':'Back to Login'}</span>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(div);
+}
+
+async function doLogin() {
+  const phone = document.getElementById('login-phone')?.value?.trim();
+  const password = document.getElementById('login-password')?.value;
+  if (!phone || !password) { showToast(lang==='zh'?'請填寫完整':'Please fill all fields'); return; }
+  const user = await apiLogin(phone, password, loginRole === 'user' ? undefined : loginRole);
+  if (user) {
+    document.getElementById('login-modal')?.remove();
+    showToast(lang==='zh'?'登入成功！歡迎 '+user.name:'Welcome, '+user.name);
+    apiLoadProfile();
+    // Route by role
+    if (user.role === 'therapist') setTimeout(() => goPage('page-therapist'), 500);
+    else if (user.role === 'admin') setTimeout(() => goPage('page-admin'), 500);
+    else apiLoadTherapists();
+  } else {
+    showToast(lang==='zh'?'帳號或密碼錯誤':'Wrong phone or password');
+  }
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name')?.value?.trim();
+  const phone = document.getElementById('reg-phone')?.value?.trim();
+  const password = document.getElementById('reg-password')?.value;
+  if (!phone || !password) { showToast(lang==='zh'?'請填寫完整':'Please fill all fields'); return; }
+  if (password.length < 6) { showToast(lang==='zh'?'密碼至少6位':'Password min 6 chars'); return; }
+  const user = await apiRegister(phone, password, name);
+  if (user) {
+    document.getElementById('login-modal')?.remove();
+    showToast(lang==='zh'?'注冊成功！歡迎 '+(name||phone):'Registered! Welcome '+(name||phone));
+    apiLoadProfile();
+    apiLoadTherapists();
+  } else {
+    showToast(lang==='zh'?'注冊失敗，號碼已被使用':'Registration failed, phone already used');
+  }
+}
+
+/* ── ADMIN APIs ── */
+async function apiAdminStats() {
+  const data = await apiFetch('/api/admin/stats');
+  if (!data) return;
+  const els = {
+    'admin-stat-users': data.users,
+    'admin-stat-therapists': data.therapists,
+    'admin-stat-orders': data.orders,
+    'admin-stat-revenue': '₭' + (data.revenue || 0).toLocaleString(),
+  };
+  for (const [id, val] of Object.entries(els)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+}
+
+/* ── COUPON VALIDATE ── */
+async function validateCoupon() {
+  const codeEl = document.getElementById('coupon-input-val') || document.getElementById('coupon-code-input');
+  if (!codeEl || !codeEl.value.trim()) { showToast(lang==='zh'?'請輸入優惠碼':'Enter coupon code'); return; }
+  const data = await apiFetch('/api/coupons/validate', {
+    method: 'POST',
+    body: JSON.stringify({ code: codeEl.value.trim().toUpperCase(), order_amount: selectedServicePrice || 150000 })
+  });
+  if (data && data.discount) {
+    showToast(lang==='zh'?'優惠碼有效！減免 ₭'+data.discount.toLocaleString():'Valid! Save ₭'+data.discount.toLocaleString());
+  } else {
+    showToast(lang==='zh'?'優惠碼無效':'Invalid coupon code');
+  }
+}
+
+/* ── THERAPIST EARNINGS ── */
+async function apiLoadEarnings() {
+  const orders = await apiFetch('/api/orders');
+  if (!orders) return;
+  const completed = orders.filter(o => o.status === 'completed');
+  const total = completed.reduce((s, o) => s + (o.price || 0), 0);
+  const monthEl = document.getElementById('th-earnings-total');
+  if (monthEl) monthEl.textContent = '₭' + total.toLocaleString();
+}
+
+/* ── INIT ── */
+async function apiInit() {
+  // Auto-restore session
+  if (apiToken && apiUser) {
+    console.log('[API] Restored session for', apiUser.phone, '/', apiUser.role);
+    await apiLoadProfile();
+  }
+  // Load therapists for home page
+  await apiLoadTherapists();
+
+  // Override confirmBooking with real API
+  window.confirmBooking = confirmApiBooking;
+}
+
 </script>
 </body>
 </html>
